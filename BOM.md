@@ -9,7 +9,7 @@ Materials (Unfinished):
 [2x 22pF Caps](http://robotics.org.za/index.php?route=product/product&product_id=160)             
 [1x 5v Regulator - TO-92](http://robotics.org.za/index.php?route=product/product&path=56_108&product_id=287)             
 [1x RGB LED](http://robotics.org.za/index.php?route=product/product&product_id=295)             
-2x 10uF Caps             
+[2x 10uF Caps]( http://robotics.org.za/index.php?route=product/product&path=56_106&product_id=187)             
 1x 10K Ohm Resistor             
 [5x 2/4 pin buttons (pref 4 pin -- they fit better)](http://robotics.org.za/index.php?route=product/product&product_id=153)             
 12V batteries
