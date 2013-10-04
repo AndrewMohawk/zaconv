@@ -39,6 +39,10 @@ Mini Push button Switch 4 Pin  (Pack of 5)	Mini Push button Switch 4 Pin (Pack o
 50 x		R10 =	R500             
 12v Batteries
 50 x    R4  = R200
+Atmel ATMEGA328P-PU 20MHz (Pack of 2)
+25 x		R60	= R1,500
+Capacitor Electrolytic 100uF (Pack of 10)	Capacitor Electrolytic 100uF (Pack of 10)
+5 x		R10	R50
 
 
-Total:	R1,325
+Total:	R2,675
