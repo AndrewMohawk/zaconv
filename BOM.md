@@ -4,10 +4,10 @@ Materials (Unfinished):
 (What people will need):
 ------------------------
 
-[1x ATMEGA328P (needs bootloader, we can burn it)](http://robotics.org.za/index.php?route=product/product&keyword=atmega&category_id=0&product_id=66)             
+1x ATMEGA328P (needs bootloader, we can burn it)             
 [1x 20mhz Crystal](http://robotics.org.za/index.php?route=product/product&product_id=659)              
 [2x 22pF Caps](http://robotics.org.za/index.php?route=product/product&product_id=160)             
-[1x 7805 voltage regulator (5v)](http://robotics.org.za/index.php?route=product/product&product_id=232)             
+[1x 5v Regulator - TO-92](http://robotics.org.za/index.php?route=product/product&path=56_108&product_id=287)             
 [1x RGB LED](http://robotics.org.za/index.php?route=product/product&product_id=295)             
 2x 10uF Caps             
 1x 10K Ohm Resistor             
@@ -16,10 +16,9 @@ Materials (Unfinished):
 Battery holders (spring and terminal)
 
 (What we have to offer):
------------------------- 
-1x RF 433Mhz Transmitter    
-1x RF 433Mhz Receiver    
-1x Nokia 5110 LCD    
+1x RF 433Mhz Transmitter
+1x RF 433Mhz Receiver
+1x Nokia 5110 LCD
 
 
 
@@ -31,7 +30,7 @@ Crystal 20Mhz (Pack of 4)	Crystal 20Mhz (Pack of 4) ***
 Capacitor 22pF (Pack of 10)	Capacitor 22pF (Pack of 10)             
 5 x		R9 =	R45             
 Voltage Regulator 5V (Pack of 2)	Voltage Regulator 5V (Pack of 2)             
-25 x		R12 =	R300             
+25 x		R10 =	R250             
 RGB Led`s common Cathode ( Pack of 10)	RGB Led`s common Cathode ( Pack of 10)             
 5 x		R27 =	R135             
 Mini Push button Switch 4 Pin  (Pack of 5)	Mini Push button Switch 4 Pin (Pack of 5) ***             
@@ -40,4 +39,4 @@ Mini Push button Switch 4 Pin  (Pack of 5)	Mini Push button Switch 4 Pin (Pack o
 50 x    R4  = R200
 
 
-Total:	R1,375
+Total:	R1,325
