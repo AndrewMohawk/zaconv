@@ -4,7 +4,7 @@ Materials (Unfinished):
 (What people will need):
 ------------------------
 
-1x ATMEGA328P (needs bootloader, we can burn it)             
+[1x ATMEGA328P (needs bootloader, we can burn it)](http://robotics.org.za/index.php?route=product/product&keyword=atmega&category_id=0&product_id=66)             
 [1x 20mhz Crystal](http://robotics.org.za/index.php?route=product/product&product_id=659)              
 [2x 22pF Caps](http://robotics.org.za/index.php?route=product/product&product_id=160)             
 [1x 5v Regulator - TO-92](http://robotics.org.za/index.php?route=product/product&path=56_108&product_id=287)             
@@ -16,6 +16,8 @@ Materials (Unfinished):
 Battery holders (spring and terminal)
 
 (What we have to offer):
+------------------------
+
 1x RF 433Mhz Transmitter
 1x RF 433Mhz Receiver
 1x Nokia 5110 LCD
