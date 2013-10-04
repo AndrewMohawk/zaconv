@@ -12,6 +12,8 @@ Materials (Unfinished):
 2x 10uF Caps             
 1x 10K Ohm Resistor             
 [5x 2/4 pin buttons (pref 4 pin -- they fit better)](http://robotics.org.za/index.php?route=product/product&product_id=153)             
+12V batteries
+Battery holders (spring and terminal)
 
 (What we have to offer):
 1x RF 433Mhz Transmitter
@@ -33,5 +35,8 @@ RGB Led`s common Cathode ( Pack of 10)	RGB Led`s common Cathode ( Pack of 10)
 5 x		R27 =	R135             
 Mini Push button Switch 4 Pin  (Pack of 5)	Mini Push button Switch 4 Pin (Pack of 5) ***             
 50 x		R10 =	R500             
+12v Batteries
+50 x    R4  = R200
 
-Total:	R1,175
+
+Total:	R1,375
