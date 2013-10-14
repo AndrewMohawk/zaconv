@@ -1,7 +1,37 @@
+#include <Arduino.h>
 #include <VirtualWire.h>
 #include <MemoryFree.h>
 #include <LCD5110_Graph.h>
 #include <EEPROM.h>
+void EEPROMWriteInt(int p_address, int p_value);
+unsigned int EEPROMReadInt(int p_address);
+void setup();
+void showAbout();
+void showSchedule();
+void badgeIntro();
+void MenuScreen();
+void loadTopHeader(char* text);
+void showStats();
+void MainMenu();
+void showCurrentSpeaker();
+void screenScroll();
+void showLineup();
+void parseCmds(uint8_t* buf,int buflen);
+void showFreeMem();
+int readButtons();
+void setLED(int red,int green,int blue);
+void LED0();
+void LED1();
+void LED2();
+void LED3();
+void LED4();
+void LED5();
+void loop();
+#line 1 "src/combined.ino"
+//#include <VirtualWire.h>
+//#include <MemoryFree.h>
+//#include <LCD5110_Graph.h>
+//#include <EEPROM.h>
 
 //*THIS* badgenumber
 int BadgeNumber = 1338;
@@ -92,12 +122,12 @@ MENU ITEMS
 */
 
 //About menu items
-prog_char about1[] PROGMEM = "Badges designed for ZaCon V";
-prog_char about2[] PROGMEM = "Special thanks to everyone who submitted and made it great";
-prog_char about3[] PROGMEM = "Keep these badges as tokens of our appreciation";
-prog_char about4[] PROGMEM = "From AndrewMohawk and people@zacon.org.za";
+const char PROGMEM about1[] = {"Badges designed for ZaCon V"};
+const char PROGMEM about2[] = {"Special thanks to everyone who submitted and made it great"};
+const char PROGMEM about3[] = {"Keep these badges as tokens of our appreciation"};
+const char PROGMEM about4[] = {"From AndrewMohawk and people@zacon.org.za"};
 
-PROGMEM const char *AboutArray[] = 	   
+const char* PROGMEM AboutArray[] = 	   
 {
     about1,
     about2,
@@ -108,14 +138,15 @@ PROGMEM const char *AboutArray[] =
 int numAboutItems = 4;
 
 //Main Menu items
-prog_char menu0[] PROGMEM = "Schedule";
-prog_char menu1[] PROGMEM = "Live Speaker Update";
-prog_char menu2[] PROGMEM = "Stats";
-prog_char menu3[] PROGMEM = "About";
-prog_char menu4[] PROGMEM = "Intro";
+
+const char PROGMEM menu0[] PROGMEM = {"Schedule"};
+const char PROGMEM menu1[] PROGMEM = {"Live Speaker Update"};
+const char PROGMEM menu2[] PROGMEM = {"Stats"};
+const char PROGMEM menu3[] PROGMEM = {"About"};
+const char PROGMEM menu4[] PROGMEM = {"Intro"};
 
 
-PROGMEM const char *MenuArray[] = 	   
+const char* PROGMEM MenuArray[] = 	   
 {
 	menu0,
 	menu1,
@@ -123,29 +154,30 @@ PROGMEM const char *MenuArray[] =
 	menu3,
 	menu4,
 };
+
 //number of menu items we have
 int numMenuItems = 5;
 
 //Speaker information
-prog_char string_0[] PROGMEM = "08h00-0900: Coffee and Registration";   // "String 0" etc are strings to store - change to suit.
-prog_char string_1[] PROGMEM = "09h00-09h15: Marco Slaviero - Welcome and housekeeping";
-prog_char string_2[] PROGMEM = "09h15-10h00: Tyrone Erasmus - Pentesting with Mercury";
-prog_char string_3[] PROGMEM = "10h00-10h45: Glenn Wilkinson - Terrorism,tracking,privacy and human interactions";
-prog_char string_4[] PROGMEM = "10h45-11h00: Tea Break";
-prog_char string_5[] PROGMEM = "11h00-11h30: Simeon Miteff - Alternatives to stateful packet filtering in R&E networking";
-prog_char string_6[] PROGMEM = "11h00-11h30: Manuel Corregedor - Anti-malware Technique Evaluator (ATE) - Pwning AVs";
-prog_char string_7[] PROGMEM = "11h30-12h00: Ross Simpson - Hacking Games (or 'why client side logic is bad')";
+const char PROGMEM string_0[] = "08h00-0900: Coffee and Registration";   // "String 0" etc are strings to store - change to suit.
+const char PROGMEM string_1[] = "09h00-09h15: Marco Slaviero - Welcome and housekeeping";
+const char PROGMEM string_2[] = "09h15-10h00: Tyrone Erasmus - Pentesting with Mercury";
+const char PROGMEM string_3[] = "10h00-10h45: Glenn Wilkinson - Terrorism,tracking,privacy and human interactions";
+const char PROGMEM string_4[] = "10h45-11h00: Tea Break";
+const char PROGMEM string_5[] = "11h00-11h30: Simeon Miteff - Alternatives to stateful packet filtering in R&E networking";
+const char PROGMEM string_6[] = "11h00-11h30: Manuel Corregedor - Anti-malware Technique Evaluator (ATE) - Pwning AVs";
+const char PROGMEM string_7[] = "11h30-12h00: Ross Simpson - Hacking Games (or 'why client side logic is bad')";
 
-prog_char string_8[] PROGMEM = "12h30-13h00: Joshua - HTML5 exploits or 'Cutting the edge on web development'";
-prog_char string_9[] PROGMEM = "13h00-14h00: Lunch Break";
-prog_char string_10[] PROGMEM = "14h00-14h55: Andrew MacPherson - 88MPH: Digital tricks to bypass Physical security";
-prog_char string_11[] PROGMEM = "14h55-15h55: Jacques Louw - Offensive Software Defined Radio";
-prog_char string_12[] PROGMEM = "15h55-16h15: Tea Break";
-prog_char string_13[] PROGMEM = "16h15-16h55: Schalk Heunis - Information from DSC Keybus";
-prog_char string_14[] PROGMEM = "16h55-17h40: Tom Van den Bon - USB Reverse Engineering, Just as much fun as RS-232 RE";
+const char PROGMEM string_8[] = "12h30-13h00: Joshua - HTML5 exploits or 'Cutting the edge on web development'";
+const char PROGMEM string_9[] = "13h00-14h00: Lunch Break";
+const char PROGMEM string_10[] = "14h00-14h55: Andrew MacPherson - 88MPH: Digital tricks to bypass Physical security";
+const char PROGMEM string_11[] = "14h55-15h55: Jacques Louw - Offensive Software Defined Radio";
+const char PROGMEM string_12[] = "15h55-16h15: Tea Break";
+const char PROGMEM string_13[] = "16h15-16h55: Schalk Heunis - Information from DSC Keybus";
+const char PROGMEM string_14[] = "16h55-17h40: Tom Van den Bon - USB Reverse Engineering, Just as much fun as RS-232 RE";
 
 
-PROGMEM const char *Schedule[] =
+const char* PROGMEM Schedule[] =
 {   
   string_0,
   string_1,
