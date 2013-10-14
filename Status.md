@@ -7,15 +7,17 @@
 - PCBs being designed 
 - Prototypes printed and Built
 - Alpha code will be up this week
-
+- Add required libs to repo
+- 
 ### Current:
 - PCBs being fixed for final run
-- Add required libs to repo
+
 
 ### Future: 
 - Print PCBs, 
 - test components, 
-- build serverside, 
+- build serverside
+- build liveupdate code 
 - build off with SP 
 
 ### Stuffs: 
