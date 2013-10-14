@@ -12,20 +12,20 @@ Materials (Unfinished):
 
 [2x 100uF caps] (http://robotics.org.za/index.php?route=product/product&path=56_106&product_id=187)
 
-* [1x 10K resistor](#)
-
-* [6x 1K resistors](#)
-
 [5x 4pin push buttons] (http://robotics.org.za/index.php?route=product/product&path=56_182&product_id=153)
 
 [1x RGB LED] (http://robotics.org.za/index.php?route=product/product&path=56_105&product_id=295)
 
 [1x 5v Regulator] (http://robotics.org.za/index.php?route=product/product&path=56_108&product_id=287)
 
-* [1x Diode] (#)
- 
+STILL NEED TO SOURCE:
+---------------------
+[1x Diode] (#)
 
-* -- Still need to source.
+[1x 10K resistor](#)
+
+[6x 1K resistors](#)
+ 
 
 (What people will need):
 ------------------------
