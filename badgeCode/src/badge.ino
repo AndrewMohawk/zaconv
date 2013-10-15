@@ -418,7 +418,7 @@ void showSchedule()
    myGLCD.update();
    */
    //return;
-   strcpy_P(currentStr, (char*)pgm_read_word(&(Schedule[currentScheduleItem]))); // Necessary casts and dereferencing, just copy. 
+	strcpy_P(currentStr, (char*)pgm_read_word(&(Schedule[currentScheduleItem]))); // Necessary casts and dereferencing, just copy. 
    //char* currentStr = Schedule[currentScheduleItem];
    
    
@@ -621,46 +621,6 @@ void MenuScreen()
     
 }
 
-/*void showAbout()
-{
-  myGLCD.clrScr();
-  myGLCD.drawBitmap(14,0,smallTopLogo,56,16);
-  myGLCD.update();
-  myGLCD.setFont(TinyFont);
-  myGLCD.print("www.zacon.org.za",CENTER,16);
-  int b = readButtons();
-  Serial.print(F("ABOUT"));
-  strcpy_P(currentStr, (char*)pgm_read_word(&(AboutArray[defaultMenu])));
-  if(b == 0)
-  {
-    if(defaultMenu > 0)
-    {
-    defaultMenu--;
-    }
-  }
-  else if (b == 1)
-  {
-    if(defaultMenu < 5)
-    {
-      defaultMenu++;
-    }
-  }
-  else if(b == 3)
-   {
-       LoadedScreen = 0;
-       currentMode = 0;
-       MenuScreen();
-   }
-   else
-   {
-     Serial.println(F("NOT 3!"));
-   }
-   myGLCD.print(currentStr,0,10);
-   myGLCD.setFont(TinyFont);
-   
-}*/
-
-
 void loadTopHeader(char* text)
 {
 	myGLCD.clrScr();
@@ -670,12 +630,6 @@ void loadTopHeader(char* text)
    myGLCD.print(text,CENTER,16);
   myGLCD.update();
 }
-
-
-
-
-
-
 
 void showStats()
 {
@@ -761,42 +715,6 @@ void showLineup()
   delay(2000);
 }
 
-/*
-int readButtons()
-{
-    int buttonPressed;
-    int c=analogRead(5);
-    if(c > 100 && c < 200)
-    {
-        //Button 1
-        buttonPressed = 0;
-        Serial.println(F("prev"));
-        
-    }
-    else if (c < 100 && c > 80)
-    {
-        buttonPressed = 1;
-        Serial.println(F("next"));
-        //Button 2
-    }
-    else if (c < 80 && c > 50)
-    {
-        buttonPressed = 2;
-        Serial.println(F("select"));
-        //button 3
-    }
-    else if (c < 50 && c > 0)
-    {
-        buttonPressed = 3;
-        Serial.println(F("other"));
-        //button 4
-    }
-    
-   return buttonPressed;
-}
-
-
-*/
 void parseCmds(uint8_t* buf,int buflen)
 {
 	
@@ -926,6 +844,7 @@ void showFreeMem()
     Serial.print("freeMemory()=");
     Serial.println(freeMemory());
 }
+
 //new button reader, saves resistors and i have the pins anyway (yes i know resistors are nearly free anyway!)
 int readButtons()
 {
@@ -973,10 +892,6 @@ int readButtons()
 	}
 
 	return -1;
-	
-	
-	//delay(100);
-
 }
 
 /*
@@ -1049,15 +964,15 @@ void loop()
 
   if(currentMode == 0)
   {
-    MenuScreen();
+	  MenuScreen();
   }
   else if(currentMode == 1)
   {
-      showSchedule();
+	  showSchedule();
   }
   else if(currentMode == 2)
   {
-	//showLiveSpeaker();
+	  //showLiveSpeaker();
   }
   else if(currentMode == 3)
   {
@@ -1067,7 +982,6 @@ void loop()
   {
 	  showStats();
   }
-  
 
   /* RF Loop */
 
@@ -1077,80 +991,41 @@ void loop()
   unsigned long currentMillis = millis();
  
  
-if(currentMillis - previousMillis > randInterval) 
+  if(currentMillis - previousMillis > randInterval) 
   {
-    LED3();
-	previousMillis = currentMillis;  
-    randInterval = random(350,2000);
-    
-    sprintf(currentRFStr,"S%i",BadgeNumber);
-	
-    vw_send((uint8_t *)currentRFStr, 6);
-    vw_wait_tx(); // Wait until the whole message is gone
-    //Serial.print(F("Sent: ")); Serial.print(currentRFStr); Serial.println(F("!"));
-    //LED0();
-    
-	//LED4();
-    
-	//sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[0]);
-	//vw_send((uint8_t *)currentRFStr, 11);
+	  LED3();
+	  previousMillis = currentMillis;  
+	  randInterval = random(350,2000);
 
-	/*
-	
-	So ideally if it was a bit quicker id love to send all 5 last badges ive seen 
-	as well as the last 5 relationships i've seen, but its not gonna happen unless
-	you dont want the menu system to work. so we are gonna just random it.
-	*/
+	  sprintf(currentRFStr,"S%i",BadgeNumber);
 
-	if(numLastFiveRelationships > 0)
-	{
-		int r_ID = random(0,numLastFiveRelationships);
-		sprintf(currentRFStr,"R%i:%i",LastFiveRelationships1[r_ID],LastFiveRelationships2[r_ID]);
-        vw_send((uint8_t *)currentRFStr, 11);
-        vw_wait_tx(); // Wait until the whole message is gone
-	}
+	  vw_send((uint8_t *)currentRFStr, 6);
+	  vw_wait_tx(); // Wait until the whole message is gone
 
-	if(numLastFiveBadges > 0)
-	{
-		int r_ID = random(0,numLastFiveBadges);
-		sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[r_ID]);
-        vw_send((uint8_t *)currentRFStr, 11);
-        vw_wait_tx(); // Wait until the whole message is gone
-	}
-/*
-	for(int i=0;i<1;i++)
-    {
-		
-      if(LastFiveBadges[i] > 0)
-      {
-	    sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[i]);
-		vw_send((uint8_t *)currentRFStr, 11);
-        //char msgC[100];
-        //sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[i]);
-		//sprintf(currentRFStr,"R%i",LastFiveBadges[i]);
-        //vw_send((uint8_t *)currentRFStr, 11);
-        vw_wait_tx(); // Wait until the whole message is gone
-        
-      }
-	}
-	//LED3();
-	for(int i=0;i<5;i++)
-    {
-      if(LastFiveRelationships1[i] > 0)
-      {
-        //char msgC[100];
-        //sprintf(currentRFStr,"R%i:%i",LastFiveRelationships1[i],LastFiveRelationships2[i]);
-        //vw_send((uint8_t *)currentRFStr, 11);
-        //vw_wait_tx(); // Wait until the whole message is gone
-        
-      }
-    }
+	  /*
 
-*/
-	//Serial.println(millis());
-	LED0();
-    
+	     So ideally if it was a bit quicker id love to send all 5 last badges ive seen 
+	     as well as the last 5 relationships i've seen, but its not gonna happen unless
+	     you dont want the menu system to work. so we are gonna just random it.
+	   */
 
+	  if(numLastFiveRelationships > 0)
+	  {
+		  int r_ID = random(0,numLastFiveRelationships);
+		  sprintf(currentRFStr,"R%i:%i",LastFiveRelationships1[r_ID],LastFiveRelationships2[r_ID]);
+		  vw_send((uint8_t *)currentRFStr, 11);
+		  vw_wait_tx(); // Wait until the whole message is gone
+	  }
+
+	  if(numLastFiveBadges > 0)
+	  {
+		  int r_ID = random(0,numLastFiveBadges);
+		  sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[r_ID]);
+		  vw_send((uint8_t *)currentRFStr, 11);
+		  vw_wait_tx(); // Wait until the whole message is gone
+	  }
+	  //Serial.println(millis());
+	  LED0();
   }
   
   
@@ -1165,10 +1040,5 @@ if(currentMillis - previousMillis > randInterval)
     LED0();
     //digitalWrite(13, false);
   }
-  
-  
-  
-
-  
 }
 
