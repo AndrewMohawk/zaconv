@@ -837,7 +837,16 @@ void parseCmds(uint8_t* buf,int buflen)
      
      
    }
+  else if(message_mode == 'P')
+  {
+    //We are programming the badge number
+    char NewBadgeNumber[5];
+    strncpy(NewBadgeNumber,(entireMessage+1),4);
+    NewBadgeNumber[4] = '\0';
+    int badgeNum = atoi(NewBadgeNumber);
+    BadgeNumber = badgeNum
 
+  }
 }
 void showFreeMem()
 {
@@ -947,98 +956,105 @@ void LED5()
 void loop()
 {  
   
-  
-  /* 
-	LCD/Mode Loop 
-	-------------
-
-	Modes:
-	0: Main Menu
-	1: Current Schedule
-	2: Live Speaker
-	3: About
-	4: Stats
-	INTRO EXCLUDED -- doesnt need to loop into it	
-  
-  */
-
-  if(currentMode == 0)
+  if(BadgeNumber > -1)
   {
-	  MenuScreen();
-  }
-  else if(currentMode == 1)
-  {
-	  showSchedule();
-  }
-  else if(currentMode == 2)
-  {
-	  //showLiveSpeaker();
-  }
-  else if(currentMode == 3)
-  {
-	  showAbout();
-  }
-  else if(currentMode == 4)
-  {
-	  showStats();
-  }
+    /* 
+    LCD/Mode Loop 
+    -------------
 
-  /* RF Loop */
-
-  
-  uint8_t buf[VW_MAX_MESSAGE_LEN];
-  uint8_t buflen = VW_MAX_MESSAGE_LEN;
-  unsigned long currentMillis = millis();
- 
- 
-  if(currentMillis - previousMillis > randInterval) 
-  {
-	  LED3();
-	  previousMillis = currentMillis;  
-	  randInterval = random(350,2000);
-
-	  sprintf(currentRFStr,"S%i",BadgeNumber);
-
-	  vw_send((uint8_t *)currentRFStr, 6);
-	  vw_wait_tx(); // Wait until the whole message is gone
-
-	  /*
-
-	     So ideally if it was a bit quicker id love to send all 5 last badges ive seen 
-	     as well as the last 5 relationships i've seen, but its not gonna happen unless
-	     you dont want the menu system to work. so we are gonna just random it.
-	   */
-
-	  if(numLastFiveRelationships > 0)
-	  {
-		  int r_ID = random(0,numLastFiveRelationships);
-		  sprintf(currentRFStr,"R%i:%i",LastFiveRelationships1[r_ID],LastFiveRelationships2[r_ID]);
-		  vw_send((uint8_t *)currentRFStr, 11);
-		  vw_wait_tx(); // Wait until the whole message is gone
-	  }
-
-	  if(numLastFiveBadges > 0)
-	  {
-		  int r_ID = random(0,numLastFiveBadges);
-		  sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[r_ID]);
-		  vw_send((uint8_t *)currentRFStr, 11);
-		  vw_wait_tx(); // Wait until the whole message is gone
-	  }
-	  //Serial.println(millis());
-	  LED0();
-  }
-  
-  
-  
-  
-  if (vw_get_message(buf, &buflen)) // Non-blocking
-  {
+    Modes:
+    0: Main Menu
+    1: Current Schedule
+    2: Live Speaker
+    3: About
+    4: Stats
+    INTRO EXCLUDED -- doesnt need to loop into it	
     
+    */
+
+    if(currentMode == 0)
+    {
+      MenuScreen();
+    }
+    else if(currentMode == 1)
+    {
+      showSchedule();
+    }
+    else if(currentMode == 2)
+    {
+      //showLiveSpeaker();
+    }
+    else if(currentMode == 3)
+    {
+      showAbout();
+    }
+    else if(currentMode == 4)
+    {
+      showStats();
+    }
+
+    /* RF Loop */
+
+    
+    uint8_t buf[VW_MAX_MESSAGE_LEN];
+    uint8_t buflen = VW_MAX_MESSAGE_LEN;
+    unsigned long currentMillis = millis();
    
-    LED2();
-    parseCmds(buf,buflen);
-    LED0();
-    //digitalWrite(13, false);
+   
+    if(currentMillis - previousMillis > randInterval) 
+    {
+      LED3();
+      previousMillis = currentMillis;  
+      randInterval = random(350,2000);
+
+      sprintf(currentRFStr,"S%i",BadgeNumber);
+
+      vw_send((uint8_t *)currentRFStr, 6);
+      vw_wait_tx(); // Wait until the whole message is gone
+
+      /*
+
+         So ideally if it was a bit quicker id love to send all 5 last badges ive seen 
+         as well as the last 5 relationships i've seen, but its not gonna happen unless
+         you dont want the menu system to work. so we are gonna just random it.
+       */
+
+      if(numLastFiveRelationships > 0)
+      {
+        int r_ID = random(0,numLastFiveRelationships);
+        sprintf(currentRFStr,"R%i:%i",LastFiveRelationships1[r_ID],LastFiveRelationships2[r_ID]);
+        vw_send((uint8_t *)currentRFStr, 11);
+        vw_wait_tx(); // Wait until the whole message is gone
+      }
+
+      if(numLastFiveBadges > 0)
+      {
+        int r_ID = random(0,numLastFiveBadges);
+        sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[r_ID]);
+        vw_send((uint8_t *)currentRFStr, 11);
+        vw_wait_tx(); // Wait until the whole message is gone
+      }
+      //Serial.println(millis());
+      LED0();
+    }
+  
+  
+  
+  
+    if (vw_get_message(buf, &buflen)) // Non-blocking
+    {
+      LED2();
+      parseCmds(buf,buflen);
+      LED0();
+      //digitalWrite(13, false);
+    }
+  } 
+  else 
+  {
+    if (vw_get_message(buf, &buflen)) // Non-blocking
+    {
+
+    }
   }
 }
 
