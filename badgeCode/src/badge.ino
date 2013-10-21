@@ -1,10 +1,12 @@
+#include <avr/power.h>
 #include <VirtualWire.h>
 #include <MemoryFree.h>
 #include <LCD5110_Graph.h>
 #include <EEPROM.h>
 
 //*THIS* badgenumber
-int BadgeNumber = -1;
+//int BadgeNumber = -1;
+int BadgeNumber = 1339;
 
 //Send Rand Interval things
 long previousMillis = 0;
@@ -224,6 +226,7 @@ return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
 
 void setup()
 {
+	if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
 	//Start Serial Comms
 	Serial.begin(9600);
 	
@@ -264,7 +267,7 @@ void setup()
 
 	/* EEPROM Config */
 	//EEPROMWriteInt(0,12345);
-	int storedBadgeNumber = EEPROMReadInt(0);
+	int storedBadgeNumber = BadgeNumber;//EEPROMReadInt(0);
 	//If we have stored the badgeNumber before then restore it, otherwise continue with -1 which will request a load via rf
 	//Since we store all badge number from 1337 onwards this is an workable check
 	if(storedBadgeNumber  > 1330)
@@ -275,6 +278,10 @@ void setup()
 	if(storedBadgeNumber == BadgeNumber)
 	{
 		numBadgesSeen = EEPROMReadInt(2);
+		if(numBadgesSeen < 0)
+		{
+			numBadgesSeen = 0;
+		}
 	}
 	else
 	{
