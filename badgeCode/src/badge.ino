@@ -4,7 +4,7 @@
 #include <EEPROM.h>
 
 //*THIS* badgenumber
-int BadgeNumber = 1338;
+int BadgeNumber = -1;
 
 //Send Rand Interval things
 long previousMillis = 0;
@@ -61,7 +61,7 @@ int LastFiveRelationships2[5];
 int numLastFiveRelationships = 0;
 
 //LCD Object
-LCD5110 myGLCD(8,9,10,11,12);
+LCD5110 myGLCD(8,9,10,12,11);
 
 /*
 External logos: stored in zaconlogo.c
@@ -264,16 +264,27 @@ void setup()
 
 	/* EEPROM Config */
 	//EEPROMWriteInt(0,12345);
-	int eBadge = EEPROMReadInt(0);
-	if(eBadge == BadgeNumber)
+	int storedBadgeNumber = EEPROMReadInt(0);
+	//If we have stored the badgeNumber before then restore it, otherwise continue with -1 which will request a load via rf
+	//Since we store all badge number from 1337 onwards this is an workable check
+	if(storedBadgeNumber  > 1330)
 	{
-			numBadgesSeen = EEPROMReadInt(2);
+		BadgeNumber = storedBadgeNumber;
+	}
+	//This will only happen once a badge has been configured and hopefully has some seen badges
+	if(storedBadgeNumber == BadgeNumber)
+	{
+		numBadgesSeen = EEPROMReadInt(2);
 	}
 	else
 	{
-			/* No writes for now -- saving */
+		//Only write if we have a non empty value
+		if(BadgeNumber != -1)
+		{
+			/* saving */
 			EEPROMWriteInt(0,BadgeNumber); // write badge
 			EEPROMWriteInt(2,0); // write num seen
+		}
 	}
 
 	
@@ -844,7 +855,8 @@ void parseCmds(uint8_t* buf,int buflen)
     strncpy(NewBadgeNumber,(entireMessage+1),4);
     NewBadgeNumber[4] = '\0';
     int badgeNum = atoi(NewBadgeNumber);
-    BadgeNumber = badgeNum
+    BadgeNumber = badgeNum;
+    EEPROMWriteInt(0,BadgeNumber); // write badge
 
   }
 }
@@ -956,6 +968,8 @@ void LED5()
 void loop()
 {  
   
+  uint8_t buf[VW_MAX_MESSAGE_LEN];
+  uint8_t buflen = VW_MAX_MESSAGE_LEN;
   if(BadgeNumber > -1)
   {
     /* 
@@ -996,8 +1010,6 @@ void loop()
     /* RF Loop */
 
     
-    uint8_t buf[VW_MAX_MESSAGE_LEN];
-    uint8_t buflen = VW_MAX_MESSAGE_LEN;
     unsigned long currentMillis = millis();
    
    
@@ -1051,10 +1063,12 @@ void loop()
   } 
   else 
   {
+    loadTopHeader("Waiting for RF Sync for badge Number");
     if (vw_get_message(buf, &buflen)) // Non-blocking
     {
-
+       parseCmds(buf,buflen);
     }
+    delay(1000);
   }
 }
 
