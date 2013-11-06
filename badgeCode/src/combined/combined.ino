@@ -4,17 +4,12 @@
 #include <LCD5110_Graph.h>
 #include <EEPROM.h>
 
-
-
 /* Buttons */
 
 Bounce b1 = Bounce(A4, 10);
 Bounce b2 = Bounce(A3, 10);
 Bounce b3 = Bounce(A2, 10);
 Bounce b4 = Bounce(A1, 10);
-
-
-
 
 //*THIS* badgenumber
 int BadgeNumber = 1111;
@@ -98,6 +93,8 @@ extern uint8_t statsTopHeader[];
 //Fonts
 extern unsigned char SmallFont[];
 extern unsigned char TinyFont[];
+
+prog_char zaconURL[] PROGMEM = "www.zacon.org.za";
 
 
 /*
@@ -322,10 +319,6 @@ void setup()
 	pinMode(A4,INPUT);
 	digitalWrite(A4, HIGH);
 	
-	
-	
-	
-	
 	LED_GREEN();	
 	//Play Intro
 	badgeIntro();
@@ -432,15 +425,7 @@ void showSchedule()
 		myGLCD.clrScr();
 		loadTopHeader("");
 	}
-   /*myGLCD.setFont(SmallFont);
-   myGLCD.print("SCHEDULE",CENTER,2);
-   myGLCD.setFont(TinyFont);
-   myGLCD.update();
-   */
-   //return;
    strcpy_P(currentStr, (char*)pgm_read_word(&(Schedule[currentScheduleItem]))); // Necessary casts and dereferencing, just copy. 
-   //char* currentStr = Schedule[currentScheduleItem];
-   
    
    int numChars = strlen(currentStr);
    int charsPerRow = 20;
@@ -518,21 +503,21 @@ void showSchedule()
    
 }
 
-
-void badgeIntro()
+void drawZClogo()
 {
     myGLCD.clrScr();
     myGLCD.drawBitmap(0,0,zaconlogo,84,48);
     myGLCD.update();
     delay(2000);
-    
+}
+
+void badgeIntro()
+{
+    drawZClogo();        
     screenScroll();
     
-    myGLCD.clrScr();
-    myGLCD.drawBitmap(0,0,zaconlogo,84,48);
-    myGLCD.update();
-    myGLCD.invert(true);
-    delay(2000);
+    
+    drawZClogo();        
     myGLCD.invert(false);
     
     myGLCD.clrScr();
@@ -544,7 +529,7 @@ void MenuScreen()
     if(LoadedScreen == 0)
     {
 	  
-      loadTopHeader("www.zacon.org.za");
+      loadTopHeader(zaconURL);
       MainMenu();
       LoadedScreen = 1;
 	  
@@ -552,93 +537,80 @@ void MenuScreen()
 	
     
     int b = readButtons();
-	
-    if(b == 1) // Left
-    {
-       LoadedScreen = 0;
-       if(defaultMenu == 0)
-        {
-          defaultMenu = numMenuItems - 1;
-        }
-        else
-        {
-          defaultMenu--;
-        }
-    }
-    else if (b == 2) // Right
-    {
-        LoadedScreen = 0;
-        if(defaultMenu == (numMenuItems - 1))
-        {
-          defaultMenu = 0;
-        }
-        else
-        {
-          defaultMenu++;
-        }
-    }
-    else if (b == 3) // Select
-    {
+    switch(b){
+        case 1:
+            LoadedScreen = 0;
+            if(defaultMenu == 0)
+            {
+                defaultMenu = numMenuItems - 1;
+            }
+            else
+            {
+                defaultMenu--;
+            }
+            break;
+        case 2:
+            LoadedScreen = 0;
+            if(defaultMenu == (numMenuItems - 1))
+            {
+                defaultMenu = 0;
+            }
+            else
+            {
+                defaultMenu++;
+            }
 
-		
-		/* 
-			MENU ITEMS 
-			----------
-			0: Schedule
-			1: Live Speaker
-			2: Stats
-			3: About
-			4: Intro
+            break;
+        case 3:
 
-			MODES
-			----------
-			0: Main Menu
-			1: Current Schedule
-			2: Live Speaker
-			3: About
-			4: Stats
-		*/
+            /* 
+               MENU ITEMS 
+               ----------
+                0: Schedule
+                1: Live Speaker
+                2: Stats
+                3: About
+                4: Intro
 
-        LoadedScreen = 0;
-        
-        if(defaultMenu == 0) // schedule
-        {
-			Serial.println("loading schedule");
-            currentMode = 1; 
-        }
-		else if(defaultMenu == 1) //Live Speaker
-		{
-			//currentMode = 2;
-		}
-		else if(defaultMenu == 2) //Stats
-		{
-			currentMode = 4;
-		}
-		else if(defaultMenu == 3) // About
-		{
-			currentMode = 3;
-		}
-		else if(defaultMenu == 4) // intro
-        {
-          currentMode = 99; //so we dont get both menu and intro trying to run
-		  badgeIntro();
-          currentMode = 0; // back to menu
-        }
+                MODES
+                ----------
+                0: Main Menu
+                1: Current Schedule
+                2: Live Speaker
+                3: About
+                4: Stats
+             */
 
-        /*if(defaultMenu == 5)
-        {
-          currentMode = 3; 
-          myGLCD.clrScr();
-          myGLCD.update();
-          defaultMenu = 0;
-          showAbout();
-        }*/
+            LoadedScreen = 0;
+
+            if(defaultMenu == 0) // schedule
+            {
+                Serial.println("loading schedule");
+                currentMode = 1; 
+            }
+            else if(defaultMenu == 1) //Live Speaker
+            {
+                //currentMode = 2;
+            }
+            else if(defaultMenu == 2) //Stats
+            {
+                currentMode = 4;
+            }
+            else if(defaultMenu == 3) // About
+            {
+                currentMode = 3;
+            }
+            else if(defaultMenu == 4) // intro
+            {
+                currentMode = 99; //so we dont get both menu and intro trying to run
+                badgeIntro();
+                currentMode = 0; // back to menu
+            }
+            break;
+        case 4:
+            currentMode = 0;
+            break;
     }
-    else if (b == 4)
-    {
-      currentMode = 0;
-    }
-    
 }
 
 
