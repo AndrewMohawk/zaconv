@@ -126,6 +126,7 @@ prog_char menu1[] PROGMEM = "Live Speaker Update";
 prog_char menu2[] PROGMEM = "Stats";
 prog_char menu3[] PROGMEM = "About";
 prog_char menu4[] PROGMEM = "Intro";
+prog_char menu5[] PROGMEM = "WHOAMI";
 
 
 PROGMEM const char *MenuArray[] = 	   
@@ -135,6 +136,7 @@ PROGMEM const char *MenuArray[] =
 	menu2,
 	menu3,
 	menu4,
+	menu5,
 };
 //number of menu items we have
 int numMenuItems = 5;
@@ -639,45 +641,6 @@ void MenuScreen()
     
 }
 
-/*void showAbout()
-{
-  myGLCD.clrScr();
-  myGLCD.drawBitmap(14,0,smallTopLogo,56,16);
-  myGLCD.update();
-  myGLCD.setFont(TinyFont);
-  myGLCD.print("www.zacon.org.za",CENTER,16);
-  int b = readButtons();
-  Serial.print(F("ABOUT"));
-  strcpy_P(currentStr, (char*)pgm_read_word(&(AboutArray[defaultMenu])));
-  if(b == 0)
-  {
-    if(defaultMenu > 0)
-    {
-    defaultMenu--;
-    }
-  }
-  else if (b == 1)
-  {
-    if(defaultMenu < 5)
-    {
-      defaultMenu++;
-    }
-  }
-  else if(b == 3)
-   {
-       LoadedScreen = 0;
-       currentMode = 0;
-       MenuScreen();
-   }
-   else
-   {
-     Serial.println(F("NOT 3!"));
-   }
-   myGLCD.print(currentStr,0,10);
-   myGLCD.setFont(TinyFont);
-   
-}*/
-
 
 void loadTopHeader(char* text)
 {
@@ -688,12 +651,6 @@ void loadTopHeader(char* text)
    myGLCD.print(text,CENTER,16);
   myGLCD.update();
 }
-
-
-
-
-
-
 
 void showStats()
 {
@@ -779,42 +736,6 @@ void showLineup()
   delay(2000);
 }
 
-/*
-int readButtons()
-{
-    int buttonPressed;
-    int c=analogRead(5);
-    if(c > 100 && c < 200)
-    {
-        //Button 1
-        buttonPressed = 0;
-        Serial.println(F("prev"));
-        
-    }
-    else if (c < 100 && c > 80)
-    {
-        buttonPressed = 1;
-        Serial.println(F("next"));
-        //Button 2
-    }
-    else if (c < 80 && c > 50)
-    {
-        buttonPressed = 2;
-        Serial.println(F("select"));
-        //button 3
-    }
-    else if (c < 50 && c > 0)
-    {
-        buttonPressed = 3;
-        Serial.println(F("other"));
-        //button 4
-    }
-    
-   return buttonPressed;
-}
-
-
-*/
 void parseCmds(uint8_t* buf,int buflen)
 {
 	
@@ -944,6 +865,7 @@ void showFreeMem()
     Serial.print("freeMemory()=");
     Serial.println(freeMemory());
 }
+
 //new button reader, saves resistors and i have the pins anyway (yes i know resistors are nearly free anyway!)
 int readButtons()
 {
@@ -968,54 +890,6 @@ int readButtons()
 		return 4;
 	}
 	return -1;
-
-	/*int b1 = digitalRead(A4);
-	int b2 = digitalRead(A3);
-	int b3 = digitalRead(A2);
-	int b4 = digitalRead(A1);
-	
-	int pressedState = LOW;
-	
-
-	long currentMillis = millis();
-	//Serial.println(currentMillis - lastButtonCheck);
-	if(currentMillis - lastButtonCheck > debounceDelay)
-	{
-		//Serial.println("SOT");
-		if(b1 == pressedState)
-		{
-			
-			Serial.println("B1 Pushed");
-			return 1;
-		}
-		if(b2 == pressedState)
-		{
-			Serial.println("B2 Pushed");
-			return 2;
-			
-		}
-		if(b3 == pressedState)
-		{
-			Serial.println("B3 Pushed");
-			return 3;
-			
-		}
-		if(b4 == pressedState)
-		{
-			Serial.println("B4 Pushed");
-			return 4;
-			
-		}
-		//Serial.print("1:");Serial.print(b1);Serial.print("2:");Serial.println(b2);
-		//Serial.println("EOT");
-		lastButtonCheck = millis();
-		
-	}
-
-	return -1;
-	*/
-	
-	
 	//delay(100);
 
 }
@@ -1096,7 +970,7 @@ void loop()
         showSchedule();
         break;
     case 2:
-        showLiveSpeaker();
+        //showLiveSpeaker();
         break;
     case 3:
         showAbout();
