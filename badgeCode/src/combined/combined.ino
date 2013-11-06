@@ -4,17 +4,12 @@
 #include <LCD5110_Graph.h>
 #include <EEPROM.h>
 
-
-
 /* Buttons */
 
 Bounce b1 = Bounce(A4, 10);
 Bounce b2 = Bounce(A3, 10);
 Bounce b3 = Bounce(A2, 10);
 Bounce b4 = Bounce(A1, 10);
-
-
-
 
 //*THIS* badgenumber
 int BadgeNumber = 1111;
@@ -99,6 +94,8 @@ extern uint8_t statsTopHeader[];
 extern unsigned char SmallFont[];
 extern unsigned char TinyFont[];
 
+prog_char zaconURL[] PROGMEM = "www.zacon.org.za";
+
 
 /*
 MENU ITEMS
@@ -126,6 +123,7 @@ prog_char menu1[] PROGMEM = "Live Speaker Update";
 prog_char menu2[] PROGMEM = "Stats";
 prog_char menu3[] PROGMEM = "About";
 prog_char menu4[] PROGMEM = "Intro";
+prog_char menu5[] PROGMEM = "WHOAMI";
 
 
 PROGMEM const char *MenuArray[] = 	   
@@ -135,6 +133,7 @@ PROGMEM const char *MenuArray[] =
 	menu2,
 	menu3,
 	menu4,
+	menu5,
 };
 //number of menu items we have
 int numMenuItems = 5;
@@ -320,10 +319,6 @@ void setup()
 	pinMode(A4,INPUT);
 	digitalWrite(A4, HIGH);
 	
-	
-	
-	
-	
 	LED_GREEN();	
 	//Play Intro
 	badgeIntro();
@@ -430,15 +425,7 @@ void showSchedule()
 		myGLCD.clrScr();
 		loadTopHeader("");
 	}
-   /*myGLCD.setFont(SmallFont);
-   myGLCD.print("SCHEDULE",CENTER,2);
-   myGLCD.setFont(TinyFont);
-   myGLCD.update();
-   */
-   //return;
    strcpy_P(currentStr, (char*)pgm_read_word(&(Schedule[currentScheduleItem]))); // Necessary casts and dereferencing, just copy. 
-   //char* currentStr = Schedule[currentScheduleItem];
-   
    
    int numChars = strlen(currentStr);
    int charsPerRow = 20;
@@ -516,21 +503,21 @@ void showSchedule()
    
 }
 
-
-void badgeIntro()
+void drawZClogo()
 {
     myGLCD.clrScr();
     myGLCD.drawBitmap(0,0,zaconlogo,84,48);
     myGLCD.update();
     delay(2000);
-    
+}
+
+void badgeIntro()
+{
+    drawZClogo();        
     screenScroll();
     
-    myGLCD.clrScr();
-    myGLCD.drawBitmap(0,0,zaconlogo,84,48);
-    myGLCD.update();
-    myGLCD.invert(true);
-    delay(2000);
+    
+    drawZClogo();        
     myGLCD.invert(false);
     
     myGLCD.clrScr();
@@ -542,7 +529,7 @@ void MenuScreen()
     if(LoadedScreen == 0)
     {
 	  
-      loadTopHeader("www.zacon.org.za");
+      loadTopHeader(zaconURL);
       MainMenu();
       LoadedScreen = 1;
 	  
@@ -550,133 +537,81 @@ void MenuScreen()
 	
     
     int b = readButtons();
-	
-    if(b == 1) // Left
-    {
-       LoadedScreen = 0;
-       if(defaultMenu == 0)
-        {
-          defaultMenu = numMenuItems - 1;
-        }
-        else
-        {
-          defaultMenu--;
-        }
-    }
-    else if (b == 2) // Right
-    {
-        LoadedScreen = 0;
-        if(defaultMenu == (numMenuItems - 1))
-        {
-          defaultMenu = 0;
-        }
-        else
-        {
-          defaultMenu++;
-        }
-    }
-    else if (b == 3) // Select
-    {
+    switch(b){
+        case 1:
+            LoadedScreen = 0;
+            if(defaultMenu == 0)
+            {
+                defaultMenu = numMenuItems - 1;
+            }
+            else
+            {
+                defaultMenu--;
+            }
+            break;
+        case 2:
+            LoadedScreen = 0;
+            if(defaultMenu == (numMenuItems - 1))
+            {
+                defaultMenu = 0;
+            }
+            else
+            {
+                defaultMenu++;
+            }
 
-		
-		/* 
-			MENU ITEMS 
-			----------
-			0: Schedule
-			1: Live Speaker
-			2: Stats
-			3: About
-			4: Intro
+            break;
+        case 3:
 
-			MODES
-			----------
-			0: Main Menu
-			1: Current Schedule
-			2: Live Speaker
-			3: About
-			4: Stats
-		*/
+            /* 
+               MENU ITEMS 
+               ----------
+                0: Schedule
+                1: Live Speaker
+                2: Stats
+                3: About
+                4: Intro
 
-        LoadedScreen = 0;
-        
-        if(defaultMenu == 0) // schedule
-        {
-			Serial.println("loading schedule");
-            currentMode = 1; 
-        }
-		else if(defaultMenu == 1) //Live Speaker
-		{
-			//currentMode = 2;
-		}
-		else if(defaultMenu == 2) //Stats
-		{
-			currentMode = 4;
-		}
-		else if(defaultMenu == 3) // About
-		{
-			currentMode = 3;
-		}
-		else if(defaultMenu == 4) // intro
-        {
-          currentMode = 99; //so we dont get both menu and intro trying to run
-		  badgeIntro();
-          currentMode = 0; // back to menu
-        }
+                MODES
+                ----------
+                0: Main Menu
+                1: Current Schedule
+                2: Live Speaker
+                3: About
+                4: Stats
+             */
 
-        /*if(defaultMenu == 5)
-        {
-          currentMode = 3; 
-          myGLCD.clrScr();
-          myGLCD.update();
-          defaultMenu = 0;
-          showAbout();
-        }*/
+            LoadedScreen = 0;
+
+            if(defaultMenu == 0) // schedule
+            {
+                Serial.println("loading schedule");
+                currentMode = 1; 
+            }
+            else if(defaultMenu == 1) //Live Speaker
+            {
+                //currentMode = 2;
+            }
+            else if(defaultMenu == 2) //Stats
+            {
+                currentMode = 4;
+            }
+            else if(defaultMenu == 3) // About
+            {
+                currentMode = 3;
+            }
+            else if(defaultMenu == 4) // intro
+            {
+                currentMode = 99; //so we dont get both menu and intro trying to run
+                badgeIntro();
+                currentMode = 0; // back to menu
+            }
+            break;
+        case 4:
+            currentMode = 0;
+            break;
     }
-    else if (b == 4)
-    {
-      currentMode = 0;
-    }
-    
 }
-
-/*void showAbout()
-{
-  myGLCD.clrScr();
-  myGLCD.drawBitmap(14,0,smallTopLogo,56,16);
-  myGLCD.update();
-  myGLCD.setFont(TinyFont);
-  myGLCD.print("www.zacon.org.za",CENTER,16);
-  int b = readButtons();
-  Serial.print(F("ABOUT"));
-  strcpy_P(currentStr, (char*)pgm_read_word(&(AboutArray[defaultMenu])));
-  if(b == 0)
-  {
-    if(defaultMenu > 0)
-    {
-    defaultMenu--;
-    }
-  }
-  else if (b == 1)
-  {
-    if(defaultMenu < 5)
-    {
-      defaultMenu++;
-    }
-  }
-  else if(b == 3)
-   {
-       LoadedScreen = 0;
-       currentMode = 0;
-       MenuScreen();
-   }
-   else
-   {
-     Serial.println(F("NOT 3!"));
-   }
-   myGLCD.print(currentStr,0,10);
-   myGLCD.setFont(TinyFont);
-   
-}*/
 
 
 void loadTopHeader(char* text)
@@ -688,12 +623,6 @@ void loadTopHeader(char* text)
    myGLCD.print(text,CENTER,16);
   myGLCD.update();
 }
-
-
-
-
-
-
 
 void showStats()
 {
@@ -779,42 +708,6 @@ void showLineup()
   delay(2000);
 }
 
-/*
-int readButtons()
-{
-    int buttonPressed;
-    int c=analogRead(5);
-    if(c > 100 && c < 200)
-    {
-        //Button 1
-        buttonPressed = 0;
-        Serial.println(F("prev"));
-        
-    }
-    else if (c < 100 && c > 80)
-    {
-        buttonPressed = 1;
-        Serial.println(F("next"));
-        //Button 2
-    }
-    else if (c < 80 && c > 50)
-    {
-        buttonPressed = 2;
-        Serial.println(F("select"));
-        //button 3
-    }
-    else if (c < 50 && c > 0)
-    {
-        buttonPressed = 3;
-        Serial.println(F("other"));
-        //button 4
-    }
-    
-   return buttonPressed;
-}
-
-
-*/
 void parseCmds(uint8_t* buf,int buflen)
 {
 	
@@ -944,6 +837,7 @@ void showFreeMem()
     Serial.print("freeMemory()=");
     Serial.println(freeMemory());
 }
+
 //new button reader, saves resistors and i have the pins anyway (yes i know resistors are nearly free anyway!)
 int readButtons()
 {
@@ -968,54 +862,6 @@ int readButtons()
 		return 4;
 	}
 	return -1;
-
-	/*int b1 = digitalRead(A4);
-	int b2 = digitalRead(A3);
-	int b3 = digitalRead(A2);
-	int b4 = digitalRead(A1);
-	
-	int pressedState = LOW;
-	
-
-	long currentMillis = millis();
-	//Serial.println(currentMillis - lastButtonCheck);
-	if(currentMillis - lastButtonCheck > debounceDelay)
-	{
-		//Serial.println("SOT");
-		if(b1 == pressedState)
-		{
-			
-			Serial.println("B1 Pushed");
-			return 1;
-		}
-		if(b2 == pressedState)
-		{
-			Serial.println("B2 Pushed");
-			return 2;
-			
-		}
-		if(b3 == pressedState)
-		{
-			Serial.println("B3 Pushed");
-			return 3;
-			
-		}
-		if(b4 == pressedState)
-		{
-			Serial.println("B4 Pushed");
-			return 4;
-			
-		}
-		//Serial.print("1:");Serial.print(b1);Serial.print("2:");Serial.println(b2);
-		//Serial.println("EOT");
-		lastButtonCheck = millis();
-		
-	}
-
-	return -1;
-	*/
-	
-	
 	//delay(100);
 
 }
@@ -1096,7 +942,7 @@ void loop()
         showSchedule();
         break;
     case 2:
-        showLiveSpeaker();
+        //showLiveSpeaker();
         break;
     case 3:
         showAbout();
