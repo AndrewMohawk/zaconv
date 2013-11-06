@@ -1088,27 +1088,23 @@ void loop()
   
   */
 
-  if(currentMode == 0)
-  {
-    MenuScreen();
+  switch(currentMode) {
+    case 0:
+        MenuScreen();
+        break;
+    case 1:
+        showSchedule();
+        break;
+    case 2:
+        showLiveSpeaker();
+        break;
+    case 3:
+        showAbout();
+        break;
+    case 4:
+	    showStats();
+        break;
   }
-  else if(currentMode == 1)
-  {
-      showSchedule();
-  }
-  else if(currentMode == 2)
-  {
-	//showLiveSpeaker();
-  }
-  else if(currentMode == 3)
-  {
-	  showAbout();
-  }
-  else if(currentMode == 4)
-  {
-	  showStats();
-  }
-  
 
   /* RF Loop */
 
@@ -1131,13 +1127,7 @@ if(currentMillis - previousMillis > randInterval)
     //Serial.print(F("Sent: ")); Serial.print(currentRFStr); Serial.println(F("!"));
     LED_OFF();
     
-	//LED4();
-    
-	//sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[0]);
-	//vw_send((uint8_t *)currentRFStr, 11);
-
 	/*
-	
 	So ideally if it was a bit quicker id love to send all 5 last badges ive seen 
 	as well as the last 5 relationships i've seen, but its not gonna happen unless
 	you dont want the menu system to work. so we are gonna just random it.
@@ -1158,58 +1148,14 @@ if(currentMillis - previousMillis > randInterval)
         vw_send((uint8_t *)currentRFStr, 11);
         vw_wait_tx(); // Wait until the whole message is gone
 	}
-/*
-	for(int i=0;i<1;i++)
-    {
-		
-      if(LastFiveBadges[i] > 0)
-      {
-	    sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[i]);
-		vw_send((uint8_t *)currentRFStr, 11);
-        //char msgC[100];
-        //sprintf(currentRFStr,"R%i:%i",BadgeNumber,LastFiveBadges[i]);
-		//sprintf(currentRFStr,"R%i",LastFiveBadges[i]);
-        //vw_send((uint8_t *)currentRFStr, 11);
-        vw_wait_tx(); // Wait until the whole message is gone
-        
-      }
-	}
-	//LED3();
-	for(int i=0;i<5;i++)
-    {
-      if(LastFiveRelationships1[i] > 0)
-      {
-        //char msgC[100];
-        //sprintf(currentRFStr,"R%i:%i",LastFiveRelationships1[i],LastFiveRelationships2[i]);
-        //vw_send((uint8_t *)currentRFStr, 11);
-        //vw_wait_tx(); // Wait until the whole message is gone
-        
-      }
-    }
-
-*/
-	//Serial.println(millis());
-	//LED0();
-    
-
   }
-  
-  
-  
   
   if (vw_get_message(buf, &buflen)) // Non-blocking
   {
-    
-   
     LED_BLUE();
     parseCmds(buf,buflen);
     LED_OFF();
     //digitalWrite(13, false);
   }
-  
-  
-  
-
-  
 }
 
