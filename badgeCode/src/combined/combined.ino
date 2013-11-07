@@ -407,15 +407,7 @@ void showAbout()
            currentAboutItem--;
        }
    }
-   if(b == 4)
-   {
-       LoadedScreen = 0;
-       currentMode = 0;
-   }
-   //delay(800);
-
-   
-   
+   procesButtons();
 }
 
 void showSchedule()
@@ -638,28 +630,65 @@ void showWHOAMI()
      }
      LoadedScreen = 1;     
   }
-  checkForMainMenuCommand();
+  procesButtons();
 }
 
 void loadTopHeader(char* text)
 {
 	myGLCD.clrScr();
-  myGLCD.drawBitmap(14,0,smallTopLogo,56,16);
-  myGLCD.update();
-  myGLCD.setFont(TinyFont);
-   myGLCD.print(text,CENTER,16);
-  myGLCD.update();
+    myGLCD.drawBitmap(14,0,smallTopLogo,56,16);
+    myGLCD.update();
+    myGLCD.setFont(TinyFont);
+    myGLCD.print(text,CENTER,16);
+    myGLCD.update();
 }
 
-void checkForMainMenuCommand()
+void exitToMainMenu()
 {
-	int b = readButtons();
-	if(b == 4)
-	{
-		LoadedScreen = 0;
-		currentMode = 0;
-	}
+    LoadedScreen = 0;
+    currentMode = 0;
 }
+
+void procesButtons()
+{
+    //Calculate the switchid by adding the button and current mode 
+    //then xoring the mode out , this allows mulitple screens 
+    //to share the same function code without insanely nested if/elses.
+    /* 
+	LCD/Mode Loop 
+	-------------
+
+	Modes:
+	0: Main Menu
+	1: Current Schedule
+	2: Live Speaker
+	3: About
+	4: Stats
+	5: WHOAMI
+	INTRO EXCLUDED -- doesnt need to loop into it	
+    */
+    int buttonID = readButtons();
+    buttonID = buttonID << 4;
+    int c = buttonID | currentMode;
+    int switchID = b & c;
+    //int switchID = readButtons() + currentMode;
+    ////switchID = switchID ^ currentMode;
+    switch(switchID)
+    {
+        case 3://Save handle on the WHOAMI screen
+            procesHandleSave();
+            break;
+        case 64://General navigate to main menu function
+            exitToMainMenu());
+            break;
+    }
+}
+
+void procesHandleSave()
+{
+    
+}
+
 
 void showStats()
 {
@@ -679,7 +708,7 @@ void showStats()
 		LoadedScreen = 1;
 	}
 	//myGLCD.print(numBadgesSeen,LEFT,25);
-	checkForMainMenuCommand();
+    procesButtons();
 }
 void MainMenu()
 {
@@ -973,6 +1002,7 @@ void loop()
 	2: Live Speaker
 	3: About
 	4: Stats
+	5: WHOAMI
 	INTRO EXCLUDED -- doesnt need to loop into it	
   
   */
