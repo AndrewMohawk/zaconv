@@ -94,9 +94,6 @@ extern uint8_t statsTopHeader[];
 extern unsigned char SmallFont[];
 extern unsigned char TinyFont[];
 
-prog_char zaconURL[] PROGMEM = "www.zacon.org.za";
-
-
 /*
 MENU ITEMS
 */
@@ -136,7 +133,7 @@ PROGMEM const char *MenuArray[] =
 	menu5,
 };
 //number of menu items we have
-int numMenuItems = 5;
+int numMenuItems = 6;
 
 //Speaker information
 prog_char string_0[] PROGMEM = "08h00-0900: Coffee and Registration";   // "String 0" etc are strings to store - change to suit.
@@ -187,6 +184,7 @@ int numScheduleItems = 15;
 char currentStr[100];
 char currentRFStr[12];
 char currentSpeaker[20];
+
 /*
 MISC Vars
 */
@@ -205,6 +203,7 @@ int currentScheduleItem = 0;
 int currentAboutItem = 0;
 
 
+char badgeNick[81];
 
 /*
 	BUTTON STUFF
@@ -238,6 +237,8 @@ return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
 
 void setup()
 {
+    //Always init to 0 so that we can check later if a sync has been completed
+    badgeNick[0] = 0;
 	//Setup RBG LED
 	pinMode(redPin, OUTPUT);
 	pinMode(greenPin, OUTPUT);
@@ -529,7 +530,7 @@ void MenuScreen()
     if(LoadedScreen == 0)
     {
 	  
-      loadTopHeader(zaconURL);
+      loadTopHeader("www.zacon.org.za");
       MainMenu();
       LoadedScreen = 1;
 	  
@@ -606,6 +607,10 @@ void MenuScreen()
                 badgeIntro();
                 currentMode = 0; // back to menu
             }
+            else if(defaultMenu == 5) // WHOAMI
+			{
+                currentMode = 5;
+			}
             break;
         case 4:
             currentMode = 0;
@@ -613,6 +618,28 @@ void MenuScreen()
     }
 }
 
+void showWHOAMI()
+{
+  if(LoadedScreen == 0 )
+  {
+     if(strlen(badgeNick) > 0)
+     {
+       myGLCD.clrScr();
+       myGLCD.setFont(SmallFont);
+       myGLCD.print(badgeNick,CENTER,25);
+       myGLCD.update();
+     }
+     else
+     {
+       myGLCD.clrScr();
+       myGLCD.setFont(TinyFont);
+       myGLCD.print("No Handle Set",CENTER,25);
+       myGLCD.update();
+     }
+     LoadedScreen = 1;     
+  }
+  checkForMainMenuCommand();
+}
 
 void loadTopHeader(char* text)
 {
@@ -624,6 +651,16 @@ void loadTopHeader(char* text)
   myGLCD.update();
 }
 
+void checkForMainMenuCommand()
+{
+	int b = readButtons();
+	if(b == 4)
+	{
+		LoadedScreen = 0;
+		currentMode = 0;
+	}
+}
+
 void showStats()
 {
 	if(LoadedScreen == 0)
@@ -631,30 +668,18 @@ void showStats()
 		loadTopHeader("Stats");
 		myGLCD.setFont(TinyFont);
 	
-	String statsString = "Badge Number:";
-	statsString += BadgeNumber;
-	myGLCD.print(statsString,LEFT,25);
-	
-	statsString = "Num Badges Seen:";
-	statsString += numBadgesSeen;
-	myGLCD.print(statsString,LEFT,32);
-	myGLCD.update();
-	LoadedScreen = 1;
-	}
-	
-
-	int b = readButtons();
-	if(b == 4)
-	{
-		LoadedScreen = 0;
-		currentMode = 0;
+		String statsString = "Badge Number:";
+		statsString += BadgeNumber;
+		myGLCD.print(statsString,LEFT,25);
 		
+		statsString = "Num Badges Seen:";
+		statsString += numBadgesSeen;
+		myGLCD.print(statsString,LEFT,32);
+		myGLCD.update();
+		LoadedScreen = 1;
 	}
-	
 	//myGLCD.print(numBadgesSeen,LEFT,25);
-	
-
-
+	checkForMainMenuCommand();
 }
 void MainMenu()
 {
@@ -700,6 +725,7 @@ void screenScroll()
     }
   myGLCD.clrScr();
 }
+
 void showLineup()
 {
   screenScroll();
@@ -708,18 +734,9 @@ void showLineup()
   delay(2000);
 }
 
-void parseCmds(uint8_t* buf,int buflen)
+void handleSendMode(char * entireMessage)
 {
-	
-	//showFreeMem();
-  char* entireMessage = (char*)buf;
-  char message_mode = entireMessage[0];
-  Serial.print("mm:");Serial.print(entireMessage);Serial.println("!");
-  
-  
-  if(message_mode == 'S')
-   {
-       //Seen a Badge
+	//Seen a Badge
        //S<NNNN> where NNNN = badge
        
        char SeenBadge[5];
@@ -768,11 +785,12 @@ void parseCmds(uint8_t* buf,int buflen)
        }
        
        
-       
-   }
-  else if(message_mode == 'R')
-   {
-     //Seen a relationship
+   
+}
+
+void handleReceiveMode(char * entireMessage)
+{
+	//Seen a relationship
      //R<NNNN>:<NNNN> - as above
      //Serial.println("This is a Relationship");
      char BadgeOneC[5];
@@ -825,13 +843,39 @@ void parseCmds(uint8_t* buf,int buflen)
      
        }
      }
-     
-     
-     
-     
-   }
-
 }
+
+void handleNickUpdateMode(uint8_t* buf,int buflen)
+{
+    if(strlen(badgeNick) == 0)
+    {
+    	int n;
+    	for (n=1;n<buflen && n < 80 ; n++){
+    		badgeNick[n-1]=buf[n];
+    	}
+    	badgeNick[n]='\0';
+    }
+}
+
+void parseCmds(uint8_t* buf,int buflen)
+{
+  char* entireMessage = (char*)buf;
+  char message_mode = entireMessage[0];
+ 
+  switch (message_mode)
+  {
+	  case 'S':
+		  handleSendMode(entireMessage);           
+		  break;
+	  case 'R':
+	      handleReceiveMode(entireMessage);
+		  break;
+	  case 'U':
+	      handleNickUpdateMode(buf,buflen);
+		  break;
+  }
+}
+
 void showFreeMem()
 {
     Serial.print("freeMemory()=");
@@ -915,7 +959,6 @@ void LED_WHITE()
 }
 
 
-
 void loop()
 {  
   
@@ -948,7 +991,10 @@ void loop()
         showAbout();
         break;
     case 4:
-	    showStats();
+		showStats();
+        break;
+	case 5:
+		showWHOAMI();
         break;
   }
 
@@ -960,7 +1006,7 @@ void loop()
   unsigned long currentMillis = millis();
  
  
-if(currentMillis - previousMillis > randInterval) 
+  if(currentMillis - previousMillis > randInterval) 
   {
     //LED_BLUE();
 	previousMillis = currentMillis;  
