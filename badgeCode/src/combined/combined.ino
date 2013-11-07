@@ -3,6 +3,7 @@
 #include <MemoryFree.h>
 #include <LCD5110_Graph.h>
 #include <EEPROM.h>
+#include "EepromUtil.h"
 
 /* Buttons */
 
@@ -220,20 +221,21 @@ int bluePin = 3;
 
 void EEPROMWriteInt(int p_address, int p_value)
 {
-byte lowByte = ((p_value >> 0) & 0xFF);
-byte highByte = ((p_value >> 8) & 0xFF);
+	byte lowByte = ((p_value >> 0) & 0xFF);
+	byte highByte = ((p_value >> 8) & 0xFF);
 
-EEPROM.write(p_address, lowByte);
-EEPROM.write(p_address + 1, highByte);
+	EEPROM.write(p_address, lowByte);
+	EEPROM.write(p_address + 1, highByte);
 }
 
 unsigned int EEPROMReadInt(int p_address)
 {
-byte lowByte = EEPROM.read(p_address);
-byte highByte = EEPROM.read(p_address + 1);
+	byte lowByte = EEPROM.read(p_address);
+	byte highByte = EEPROM.read(p_address + 1);
 
-return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
+	return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
 }
+
 
 void setup()
 {
@@ -283,28 +285,32 @@ void setup()
 	
 
 
+
 	/* EEPROM Config */
-	//EEPROMWriteInt(0,12345);
+	char lowByte = (char)EEPROM.read(200);
+	if ((char)lowByte == 'N')
+	{
+		EepromUtil::eeprom_read_string(201, badgeNick, 80);
+	}
 	int eBadge = EEPROMReadInt(0);
 	if(eBadge == BadgeNumber)
 	{
-			numBadgesSeen = EEPROMReadInt(2);
+		numBadgesSeen = EEPROMReadInt(2);
 	}
 	else
 	{
-			/* No writes for now -- saving */
-			EEPROMWriteInt(0,BadgeNumber); // write badge
-			EEPROMWriteInt(2,0); // write num seen
+		/* No writes for now -- saving */
+		EEPROMWriteInt(0,BadgeNumber); // write badge
+		EEPROMWriteInt(2,0); // write num seen
 	}
 
 	
 	//Clear variables
 	for (int i=0;i<5;i++)
 	{
-	  
-	  LastFiveBadges[i] = random(1111,9999);
-	  LastFiveRelationships1[i] = random(1111,9999);
-	  LastFiveRelationships2[i] = random(1111,9999);
+		LastFiveBadges[i] = random(1111,9999);
+		LastFiveRelationships1[i] = random(1111,9999);
+		LastFiveRelationships2[i] = random(1111,9999);
 	}
 
 	
