@@ -203,7 +203,7 @@ int LoadedScreen = 0;
 int currentScheduleItem = 0;
 int currentAboutItem = 0;
 
-
+//"RC1140|Dev|Test.co.za"
 char badgeNick[81];
 
 /*
@@ -616,6 +616,51 @@ void MenuScreen()
     }
 }
 
+
+char** str_split(char* a_str, const char a_delim)
+{
+	char** result = 0;
+	size_t count = 0;
+	char* tmp = a_str;
+	char* last_comma = 0;
+
+	/* Count how many elements will be extracted. */
+	while (*tmp)
+	{
+		if (a_delim == *tmp)
+		{
+			count++;
+			last_comma = tmp;
+		}
+		tmp++;
+	}
+
+	/* Add space for trailing token. */
+	count += last_comma < (a_str + strlen(a_str) - 1);
+
+	/* Add space for terminating null string so caller
+	*        knows where the list of returned strings ends. */
+	count++;
+
+	result = (char**)malloc(sizeof(char*)* count);
+
+	if (result)
+	{
+		size_t idx = 0;
+		char* token = strtok(a_str, "|");
+
+		while (token)
+		{
+			*(result + idx++) = strdup(token);
+			token = strtok(0, "|");
+		}
+		*(result + idx) = 0;
+	}
+
+	return result;
+}
+
+//"RC1140|Dev|Test.co.za|";
 void showWHOAMI()
 {
   if(LoadedScreen == 0 )
@@ -624,7 +669,14 @@ void showWHOAMI()
      {
        myGLCD.clrScr();
        myGLCD.setFont(SmallFont);
-       myGLCD.print(badgeNick,CENTER,25);
+
+	   char** tokens = str_split(badgeNick, '|');
+	   if (tokens)
+	   {
+		   myGLCD.print(*(tokens + 0), CENTER, 10);
+		   myGLCD.print(*(tokens + 1), CENTER, 19);
+		   myGLCD.print(*(tokens +2), CENTER, 28);
+	   }
        myGLCD.update();
      }
      else
@@ -674,25 +726,36 @@ void procesButtons()
 	INTRO EXCLUDED -- doesnt need to loop into it	
     */
     int buttonID = readButtons();
-    buttonID = buttonID << 4;
-    int c = buttonID | currentMode;
-    int switchID = b & c;
-    //int switchID = readButtons() + currentMode;
-    ////switchID = switchID ^ currentMode;
-    switch(switchID)
+	
+    switch(buttonID)
     {
-        case 3://Save handle on the WHOAMI screen
-            procesHandleSave();
+        case 1://Save handle on the WHOAMI screen
+			switch (currentMode)
+			{
+				case 5:
+					procesHandleSave();
+					break;
+			}
+            
             break;
-        case 64://General navigate to main menu function
-            exitToMainMenu());
+        case 4://General navigate to main menu function
+            exitToMainMenu();
             break;
     }
 }
 
+void showSavedMessage()
+{
+	myGLCD.clrScr();
+	myGLCD.setFont(TinyFont);
+	myGLCD.print("Nick Saved To EEPROM", CENTER, 25);
+	myGLCD.update();
+}
+
 void procesHandleSave()
 {
-    
+	EepromUtil::eeprom_write_string(200, "N");
+	EepromUtil::eeprom_write_string(201, badgeNick);
 }
 
 
