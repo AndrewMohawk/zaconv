@@ -13,7 +13,7 @@ Bounce b3 = Bounce(A2, 10);
 Bounce b4 = Bounce(A1, 10);
 
 //*THIS* badgenumber
-int BadgeNumber = 1111;
+int BadgeNumber = 4040;
 
 //Send Rand Interval things
 long previousMillis = 0;
@@ -28,7 +28,7 @@ long randInterval = 1500;
 
 	Structure as of 2013/09/21 is:
 
-	0-1: <currentBadgeNumber>
+	0-1: 28 if seen before, else random.
 	2-3: <number badges seen>
 	
 	4-5: Seen Badge 1
@@ -141,7 +141,7 @@ prog_char string_0[] PROGMEM = "08h00-0900: Coffee and Registration";   // "Stri
 prog_char string_1[] PROGMEM = "09h00-09h15: Dominic White - Welcome to ZaCon V";
 prog_char string_2[] PROGMEM = "09h15-09h45: Mark Cosijn - Vehicle CAN-fu";
 prog_char string_3[] PROGMEM = "09h45-10h10: Jason 's0nic2k' Mitchell - Mains Signalling";
-prog_char string_4[] PROGMEM = "10h10-10h25: Mark John Burke - Enabling Anonymous Crime Reporting on Mobile phones...";
+prog_char string_4[] PROGMEM = "10h10-10h25: TBA";
 prog_char string_5[] PROGMEM = "10h25-10h40: Tea Break";
 prog_char string_6[] PROGMEM = "10h40-11h25: Jeremy du Bruyn - RAT-a-tat-tat: Taking the fight to RAT controllers";
 prog_char string_7[] PROGMEM = "11h25-12h05: Marcos Alvares - Automating Detection of Obfuscated Obfuscation...";
@@ -151,11 +151,11 @@ prog_char string_10[] PROGMEM = "14h00-14h30: Dimitri Foesekis - Markov Chains a
 prog_char string_11[] PROGMEM = "14h30-15h30: Dave Hartley - Native Bridges over Troubled Water";
 prog_char string_12[] PROGMEM = "15h30-16h00: Robert Gabriel - GSOC Data Diode";
 prog_char string_13[] PROGMEM = "16h00-16h15: Tea Break";
-prog_char string_14[] PROGMEM = "16h15-17h05: TBA";
+prog_char string_14[] PROGMEM = "16h15-17h05: Roelof Temmingh - To Infini-Tea and Beyond";
 prog_char string_15[] PROGMEM = "17h05-17h30: Schalk Heunis - Long tail of wifi antenna design";
 prog_char string_16[] PROGMEM = "17h30-17h45: Dominic White - Close/Awards";
 
-
+int currentLiveSpeaker = 0;
 
 PROGMEM const char *Schedule[] =
 {   
@@ -245,7 +245,7 @@ void setup()
 	pinMode(redPin, OUTPUT);
 	pinMode(greenPin, OUTPUT);
 	pinMode(bluePin, OUTPUT);
-	LED_RED();
+	
 
 	//Start Serial Comms
 	Serial.begin(9600);
@@ -273,7 +273,7 @@ void setup()
 	//pinMode(A5, INPUT_PULLUP);	
 	//delay(1000);
 
-	LED_BLUE();
+	
 	/*
 		RF Init
 	*/
@@ -292,16 +292,16 @@ void setup()
 	{
 		EepromUtil::eeprom_read_string(201, badgeNick, 80);
 	}
-	int eBadge = EEPROMReadInt(0);
-	if(eBadge == BadgeNumber)
+	//28 if the badge has been through a power cycle, else its first boot so we set it to 0
+	int usedBefore = EEPROMReadInt(0);
+	if(usedBefore == 28)
 	{
 		numBadgesSeen = EEPROMReadInt(2);
 	}
 	else
 	{
-		/* No writes for now -- saving */
-		EEPROMWriteInt(0,BadgeNumber); // write badge
-		EEPROMWriteInt(2,0); // write num seen
+        EEPROMWriteInt(0,28); // write badge
+        EEPROMWriteInt(2,0); // write num seen
 	}
 
 	
@@ -326,14 +326,11 @@ void setup()
 	pinMode(A4,INPUT);
 	digitalWrite(A4, HIGH);
 	
-	LED_GREEN();	
+		
 	//Play Intro
 	badgeIntro();
 
-
-	Serial.println("startup finished");
-	showFreeMem();
-	delay(1000);
+	
 }
 
 
@@ -344,11 +341,9 @@ void showAbout()
 	{
 		loadTopHeader("ABOUT BADGES");
 	}
-   
-   
-   //return;
+
    strcpy_P(currentStr, (char*)pgm_read_word(&(AboutArray[currentAboutItem]))); // Necessary casts and dereferencing, just copy. 
-   //char* currentStr = Schedule[currentScheduleItem];
+
    
    
    int numChars = strlen(currentStr);
@@ -368,23 +363,18 @@ void showAbout()
          if(y < numChars)
          {
            thisLine += currentStr[y];
-           //Serial.println(currentStr[y]);
          }
      }
      
      myGLCD.print(thisLine,0,25+(x*6));
      myGLCD.update();
    }
-   
- 
-   Serial.println(currentStr);
-   showFreeMem();
-   //myGLCD.update();
+
    LoadedScreen = 1;
    
    
    int b = readButtons();
-   //Serial.println(b);
+   
    if(b == 2)
    {
        LoadedScreen = 0;
@@ -415,7 +405,49 @@ void showAbout()
    }
    procesButtons();
 }
+void showLiveSpeaker()
+{
+	if(LoadedScreen == 0)
+	{
+		myGLCD.clrScr();
+		loadTopHeader("");
+	
+	strcpy_P(currentStr, (char*)pgm_read_word(&(Schedule[currentLiveSpeaker]))); // Necessary casts and dereferencing, just copy. 
+   
+   int numChars = strlen(currentStr);
+   int charsPerRow = 20;
+   int numRows = (numChars / charsPerRow) + 1;
 
+  
+   
+   for(int x=0;x<numRows;x++)
+   {
+     int rowStart = (x*charsPerRow);
+     int rowEnd = rowStart + charsPerRow;
+     String thisLine;
+     for(int y=rowStart;y<rowEnd;y++)
+     {
+         int strPos = 0;
+         if(y < numChars)
+         {
+           thisLine += currentStr[y];
+         }
+     }
+
+     myGLCD.print(thisLine,0,18+(x*6));
+     myGLCD.update();
+   }
+}
+   
+ 
+   LoadedScreen = 1;
+   int b = readButtons();
+   if(b == 4)
+   {
+       LoadedScreen = 0;
+       currentMode = 0;
+   }
+}
 void showSchedule()
 {
    
@@ -443,26 +475,19 @@ void showSchedule()
          if(y < numChars)
          {
            thisLine += currentStr[y];
-           //Serial.println(currentStr[y]);
          }
      }
-	 //Serial.println(x);
-	 //Serial.println(thisLine);
-	 //showFreeMem();
 
      myGLCD.print(thisLine,0,18+(x*6));
      myGLCD.update();
    }
    
  
-   //Serial.println(currentStr);
-   
-   //myGLCD.update();
    LoadedScreen = 1;
    
    
    int b = readButtons();
-   //Serial.println(b);
+
    if(b == 2)
    {
        LoadedScreen = 0;
@@ -496,7 +521,7 @@ void showSchedule()
        LoadedScreen = 0;
        currentMode = 0;
    }
-   //delay(800);
+
 
    
    
@@ -570,6 +595,7 @@ void MenuScreen()
                 2: Stats
                 3: About
                 4: Intro
+				5: WHOAMI
 
                 MODES
                 ----------
@@ -589,7 +615,7 @@ void MenuScreen()
             }
             else if(defaultMenu == 1) //Live Speaker
             {
-                //currentMode = 2;
+                currentMode = 2;
             }
             else if(defaultMenu == 2) //Stats
             {
@@ -612,6 +638,46 @@ void MenuScreen()
             break;
         case 4:
             currentMode = 0;
+			int x = -1;
+			randomSeed(analogRead(0));
+			if(BadgeNumber > 2000) // Attendees
+			{
+				x = 5;
+			}
+			if (BadgeNumber > 3000) // Speakers
+			{
+				x = random(2,5);
+			}
+			if (BadgeNumber > 4000) // Ubers
+			{
+				x= random(1,5);
+			}
+
+			if(x == 1)
+			{
+				vw_send((uint8_t*)"C1111", 5);
+				vw_wait_tx();
+			}
+			if(x == 2)
+			{
+				vw_send((uint8_t*)"C2222", 5);
+				vw_wait_tx();
+			}
+			if(x == 3)
+			{
+				vw_send((uint8_t*)"C3333", 5);
+				vw_wait_tx();
+			}
+			if(x == 4)
+			{
+				vw_send((uint8_t*)"C4444", 5);
+				vw_wait_tx();
+			}
+			if(x == 5)
+			{
+				vw_send((uint8_t*)"C5555", 5);
+				vw_wait_tx();
+			}
             break;
     }
 }
@@ -665,9 +731,11 @@ void showWHOAMI()
 {
   if(LoadedScreen == 0 )
   {
+	 
      if(strlen(badgeNick) > 0)
      {
        myGLCD.clrScr();
+	   loadTopHeader("WHOAMI");
        myGLCD.setFont(SmallFont);
 
 	   char** tokens = str_split(badgeNick, '|');
@@ -682,6 +750,7 @@ void showWHOAMI()
      else
      {
        myGLCD.clrScr();
+	   loadTopHeader("WHOAMI");
        myGLCD.setFont(TinyFont);
        myGLCD.print("No Handle Set",CENTER,25);
        myGLCD.update();
@@ -726,17 +795,36 @@ void procesButtons()
 	INTRO EXCLUDED -- doesnt need to loop into it	
     */
     int buttonID = readButtons();
-	
+	int b = readButtons();
+  }
     switch(buttonID)
     {
         case 1://Save handle on the WHOAMI screen
 			switch (currentMode)
 			{
 				case 5:
+                    vw_send((uint8_t*)"C3333", 5);
+                    vw_wait_tx();
 					procesHandleSave();
 					break;
 			}
-            
+            break;
+        case 2:
+            switch (currentMode)
+			{
+				case 5:
+                    vw_send((uint8_t*)"C4444", 5);
+                    vw_wait_tx();
+					break;
+			}
+            break;
+        case 3:
+            switch (currentMode)
+			{
+				case 5:
+                    vw_send((uint8_t*)"C5555", 5);
+                    vw_wait_tx();
+			}       
             break;
         case 4://General navigate to main menu function
             exitToMainMenu();
@@ -776,7 +864,6 @@ void showStats()
 		myGLCD.update();
 		LoadedScreen = 1;
 	}
-	//myGLCD.print(numBadgesSeen,LEFT,25);
     procesButtons();
 }
 void MainMenu()
@@ -832,6 +919,114 @@ void showLineup()
   delay(2000);
 }
 
+
+
+void handleLiveSpeaker(char * entireMessage)
+{
+	char LiveSpeaker[3];
+	strncpy(LiveSpeaker,(entireMessage+1),2);
+	LiveSpeaker[2] = '\0';
+	int speakerNum = atoi(LiveSpeaker);
+	currentLiveSpeaker = speakerNum;
+	LED_GREEN();
+	delay(200);
+	LED_OFF();
+	LoadedScreen = 0;
+
+
+}
+void handleCoolBadgeMode(char * entireMessage)
+{
+	char badgeMode[5];
+	strncpy(badgeMode,(entireMessage+1),4);
+	badgeMode[4] = '\0';
+	int coolmode = atoi(badgeMode);
+	Serial.print("coolmode");Serial.println(coolmode);
+	switch (coolmode)
+	{
+		case 1111:
+			/* ITS THE 5-0! */
+			for(int x=0;x<3;x++)
+			{
+			LED_RED();
+			delay(200);
+			LED_BLUE();
+			delay(200);
+			LED_WHITE();
+			delay(200);
+			LED_RED();
+			delay(200);
+			LED_BLUE();
+			delay(200);
+			LED_WHITE();
+			delay(200);
+			LED_RED();
+			delay(200);
+			LED_BLUE();
+			delay(200);
+			LED_WHITE();
+			delay(200);
+			LED_OFF();
+			}
+			break;
+		case 2222:
+			/* OUTOFIDASNOW */
+			LED_BLUE();
+			delay(200);
+			LED_GREEN();
+			delay(200);
+			LED_PURPLE();
+			delay(200);
+			LED_RED();
+			delay(200);
+			LED_ORANGE();
+			delay(200);
+			LED_WHITE();
+			delay(200);
+			break;
+		case 3333:
+			/* WHAT ABOOUTBLUE */
+			for(int i=0;i<255;i++)
+			{
+				setLED(0,0,i);
+				delay(5);
+			}
+			for(int i=255;i>0;i--)
+			{
+				setLED(0,0,i);
+				delay(5);
+			}
+			break;
+		
+		case 4444:
+			/* WHAT ABOOUTBLUE */
+			for(int i=0;i<255;i++)
+			{
+				setLED(i,0,0);
+				delay(5);
+			}
+			for(int i=255;i>0;i--)
+			{
+				setLED(i,0,0);
+				delay(5);
+			}
+			break;
+		case 5555:
+			/* WHAT ABOOUTBLUE */
+			for(int i=0;i<255;i++)
+			{
+				setLED(0,i,0);
+				delay(5);
+			}
+			for(int i=255;i>0;i--)
+			{
+				setLED(0,i,0);
+				delay(5);
+			}
+			break;
+	}
+}
+
 void handleSendMode(char * entireMessage)
 {
 	//Seen a Badge
@@ -843,9 +1038,11 @@ void handleSendMode(char * entireMessage)
        int badgeNum = atoi(SeenBadge);
         
        boolean seenAlready = false;
-       for(int i=0;i<numBadgesSeen;i++)
+	  
+       for(int i=0;i<=numBadgesSeen;i++)
        {
-         if(EEPROMReadInt( ((i*2)+2) ) == badgeNum)
+		 int EEPROMBadge = EEPROMReadInt( ((i*2)+2) );
+         if(EEPROMBadge == badgeNum)
          {
            seenAlready = true;
          }
@@ -855,7 +1052,11 @@ void handleSendMode(char * entireMessage)
        if(seenAlready == false)
        {
 			numBadgesSeen = numBadgesSeen + 1;
-		 EEPROMWriteInt( ((numBadgesSeen*2)+2), badgeNum );
+			EEPROMWriteInt( ((numBadgesSeen*2)+2), badgeNum );
+			EEPROMWriteInt(2,numBadgesSeen);
+			LED_BLUE();
+			delay(200);
+			LED_OFF();
 
        }
        
@@ -864,7 +1065,6 @@ void handleSendMode(char * entireMessage)
        seenAlready = false;
        for(int i=0;i<numLastFiveBadges;i++)
        {
-           //Serial.print("LB:");Serial.print(i);Serial.print(":");Serial.println(LastFiveBadges[i]);
            if(LastFiveBadges[i] == badgeNum)
            {
              seenAlready = true;
@@ -877,7 +1077,6 @@ void handleSendMode(char * entireMessage)
            {
              numLastFiveBadges = 0;
            }
-           Serial.print(F("adding "));Serial.print(badgeNum);Serial.println(F("-"));
            LastFiveBadges[numLastFiveBadges] = badgeNum;
            numLastFiveBadges++;
        }
@@ -933,11 +1132,12 @@ void handleReceiveMode(char * entireMessage)
            }
 
            //Serial.print("Welcome to Badge");Serial.println(BadgeNumber);
-           Serial.print(F("seen a relationship between "));
+           /*
+		   Serial.print(F("seen a relationship between "));
            Serial.print(badgeTwoI);
            Serial.print(F(" and "));
            Serial.println(badgeOneI);
-
+		   */
      
        }
      }
@@ -945,25 +1145,31 @@ void handleReceiveMode(char * entireMessage)
 
 void handleNickUpdateMode(uint8_t* buf,int buflen)
 {
-    if(strlen(badgeNick) == 0)
-    {
+    
     	int n;
     	for (n=1;n<buflen && n < 80 ; n++){
     		badgeNick[n-1]=buf[n];
     	}
     	badgeNick[n]='\0';
-    }
+
+		LED_GREEN();
+		delay(200);
+		LED_OFF();
+		LoadedScreen = 0;
 }
 
 void parseCmds(uint8_t* buf,int buflen)
 {
   char* entireMessage = (char*)buf;
   char message_mode = entireMessage[0];
- 
+  Serial.print("message:");Serial.println(entireMessage);
   switch (message_mode)
   {
 	  case 'S':
 		  handleSendMode(entireMessage);           
+		  break;
+	  case 'L':
+		  handleLiveSpeaker(entireMessage);
 		  break;
 	  case 'R':
 	      handleReceiveMode(entireMessage);
@@ -971,6 +1177,8 @@ void parseCmds(uint8_t* buf,int buflen)
 	  case 'U':
 	      handleNickUpdateMode(buf,buflen);
 		  break;
+	  case 'C':
+		  handleCoolBadgeMode(entireMessage);
   }
 }
 
@@ -985,22 +1193,18 @@ int readButtons()
 {
 	if (b1.update() && b1.fallingEdge() )
 	{
-		Serial.println("B1 Pushed");	
 		return 1;
 	}
 	if (b2.update() && b2.fallingEdge() )
 	{
-		Serial.println("B2 Pushed");
 		return 2;
 	}
 	if (b3.update() && b3.fallingEdge() )
 	{
-		Serial.println("B3 Pushed");
 		return 3;
 	}
 	if (b4.update() && b4.fallingEdge() )
 	{
-		Serial.println("B4 Pushed");
 		return 4;
 	}
 	return -1;
@@ -1056,6 +1260,11 @@ void LED_WHITE()
 	setLED(255,255,255);
 }
 
+void LED_ORANGE()
+{
+	setLED(237,120,6);
+}
+
 
 void loop()
 {  
@@ -1084,7 +1293,7 @@ void loop()
         showSchedule();
         break;
     case 2:
-        //showLiveSpeaker();
+        showLiveSpeaker();
         break;
     case 3:
         showAbout();
@@ -1115,7 +1324,6 @@ void loop()
 	
     vw_send((uint8_t *)currentRFStr, 6);
     vw_wait_tx(); // Wait until the whole message is gone
-    //Serial.print(F("Sent: ")); Serial.print(currentRFStr); Serial.println(F("!"));
     LED_OFF();
     
 	/*
@@ -1143,9 +1351,10 @@ void loop()
   
   if (vw_get_message(buf, &buflen)) // Non-blocking
   {
-    LED_BLUE();
+	/* LED EATS POWER! STOP USING IT FOR ANY VALID SIGNAL! */
+    //LED_BLUE();
     parseCmds(buf,buflen);
-    LED_OFF();
+    //LED_OFF();
     //digitalWrite(13, false);
   }
 }
