@@ -19,6 +19,10 @@ int BadgeNumber = 4040;
 long previousMillis = 0;
 long randInterval = 1500;
 
+// = "RC1140|Dev|runawaycoder"
+char badgeNick1[15];// = "RC1140";
+char badgeNick2[15];// = "Dev";
+char badgeNick3[15];// = "runawaycoder";
 //All badges seen
 //int BadgesIveSeen[100];
 //LOL @ trying to use RAM for that.. 2K >_< *facepalm*.. all badges now stored in EEPROM, 0 = this badge, 1 = badge seen 1.
@@ -203,8 +207,6 @@ int LoadedScreen = 0;
 int currentScheduleItem = 0;
 int currentAboutItem = 0;
 
-//"RC1140|Dev|Test.co.za"
-char badgeNick[81];
 
 /*
 	BUTTON STUFF
@@ -240,7 +242,10 @@ unsigned int EEPROMReadInt(int p_address)
 void setup()
 {
     //Always init to 0 so that we can check later if a sync has been completed
-    badgeNick[0] = 0;
+	badgeNick1[0] = 0;
+	badgeNick2[0] = 0;
+	badgeNick3[0] = 0;
+
 	//Setup RBG LED
 	pinMode(redPin, OUTPUT);
 	pinMode(greenPin, OUTPUT);
@@ -288,9 +293,12 @@ void setup()
 
 	/* EEPROM Config */
 	char lowByte = (char)EEPROM.read(200);
+	//If we have a nick Char set then try and load anything at address 201
 	if ((char)lowByte == 'N')
 	{
-		EepromUtil::eeprom_read_string(201, badgeNick, 80);
+		EepromUtil::eeprom_read_string(201, badgeNick1, 15);
+		EepromUtil::eeprom_read_string(216, badgeNick2, 15);
+		EepromUtil::eeprom_read_string(231, badgeNick3, 15);
 	}
 	//28 if the badge has been through a power cycle, else its first boot so we set it to 0
 	int usedBefore = EEPROMReadInt(0);
@@ -726,25 +734,21 @@ char** str_split(char* a_str, const char a_delim)
 	return result;
 }
 
-//"RC1140|Dev|Test.co.za|";
+//"RC1140|Dev|Test.co.za";
 void showWHOAMI()
 {
   if(LoadedScreen == 0 )
   {
 	 
-     if(strlen(badgeNick) > 0)
+     if(strlen(badgeNick1) > 0)
      {
        myGLCD.clrScr();
 	   loadTopHeader("WHOAMI");
        myGLCD.setFont(SmallFont);
 
-	   char** tokens = str_split(badgeNick, '|');
-	   if (tokens)
-	   {
-		   myGLCD.print(*(tokens + 0), CENTER, 10);
-		   myGLCD.print(*(tokens + 1), CENTER, 19);
-		   myGLCD.print(*(tokens +2), CENTER, 28);
-	   }
+	   myGLCD.print(badgeNick1, CENTER, 24);
+	   myGLCD.print(badgeNick2, CENTER, 32);
+	   myGLCD.print(badgeNick3, CENTER, 40);
        myGLCD.update();
      }
      else
@@ -795,8 +799,6 @@ void procesButtons()
 	INTRO EXCLUDED -- doesnt need to loop into it	
     */
     int buttonID = readButtons();
-	int b = readButtons();
-  }
     switch(buttonID)
     {
         case 1://Save handle on the WHOAMI screen
@@ -843,7 +845,10 @@ void showSavedMessage()
 void procesHandleSave()
 {
 	EepromUtil::eeprom_write_string(200, "N");
-	EepromUtil::eeprom_write_string(201, badgeNick);
+	EepromUtil::eeprom_write_string(201, badgeNick1);
+	EepromUtil::eeprom_write_string(216, badgeNick2);
+	EepromUtil::eeprom_write_string(231, badgeNick3);
+	showSavedMessage();
 }
 
 
@@ -1130,29 +1135,17 @@ void handleReceiveMode(char * entireMessage)
            {
                numLastFiveRelationships = 0;
            }
-
-           //Serial.print("Welcome to Badge");Serial.println(BadgeNumber);
-           /*
-		   Serial.print(F("seen a relationship between "));
-           Serial.print(badgeTwoI);
-           Serial.print(F(" and "));
-           Serial.println(badgeOneI);
-		   */
-     
        }
      }
 }
 
+
 void handleNickUpdateMode(uint8_t* buf,int buflen)
 {
-    
-    	int n;
-    	for (n=1;n<buflen && n < 80 ; n++){
-    		badgeNick[n-1]=buf[n];
-    	}
-    	badgeNick[n]='\0';
-
-		LED_GREEN();
+		sprintf(badgeNick1, "%.12s", buf+1);
+		sprintf(badgeNick2, "%.12s", buf+16);
+		sprintf(badgeNick3, "%.12s", buf+32);
+    	LED_GREEN();
 		delay(200);
 		LED_OFF();
 		LoadedScreen = 0;
@@ -1208,8 +1201,6 @@ int readButtons()
 		return 4;
 	}
 	return -1;
-	//delay(100);
-
 }
 
 /*
@@ -1316,7 +1307,6 @@ void loop()
  
   if(currentMillis - previousMillis > randInterval) 
   {
-    //LED_BLUE();
 	previousMillis = currentMillis;  
     randInterval = random(1000,4000);
     
@@ -1352,10 +1342,7 @@ void loop()
   if (vw_get_message(buf, &buflen)) // Non-blocking
   {
 	/* LED EATS POWER! STOP USING IT FOR ANY VALID SIGNAL! */
-    //LED_BLUE();
     parseCmds(buf,buflen);
-    //LED_OFF();
-    //digitalWrite(13, false);
   }
 }
 
