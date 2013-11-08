@@ -48,7 +48,7 @@
 				RuntimeLibrary="3"
 				WarningLevel="3"
 				DebugInformationFormat="4"
-				ForcedIncludeFiles="C:\pub\ZACONV\combined\Visual Micro\.combined.vsarduino.h"
+				ForcedIncludeFiles="C:\ZaConV\zaconv\badgeCode\src\combined\Visual Micro\.combined.vsarduino.h"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -224,7 +224,7 @@
 		/>
 		<Global
 			Name="arduino.upload.port"
-			Value="COM27"
+			Value="COM14"
 		/>
 		<Global
 			Name="arduino.upload.protocol"

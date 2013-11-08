@@ -33,15 +33,24 @@ void EEPROMWriteInt(int p_address, int p_value);
 unsigned int EEPROMReadInt(int p_address);
 //
 void showAbout();
+void showLiveSpeaker();
 void showSchedule();
+void drawZClogo();
 void badgeIntro();
 void MenuScreen();
+void showWHOAMI();
 void loadTopHeader(char* text);
+void checkForMainMenuCommand();
 void showStats();
 void MainMenu();
 void showCurrentSpeaker();
 void screenScroll();
 void showLineup();
+void handleLiveSpeaker(char * entireMessage);
+void handleCoolBadgeMode(char * entireMessage);
+void handleSendMode(char * entireMessage);
+void handleReceiveMode(char * entireMessage);
+void handleNickUpdateMode(uint8_t* buf,int buflen);
 void parseCmds(uint8_t* buf,int buflen);
 void showFreeMem();
 int readButtons();
@@ -52,10 +61,11 @@ void LED_GREEN();
 void LED_BLUE();
 void LED_PURPLE();
 void LED_WHITE();
+void LED_ORANGE();
 //
 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\standard\pins_arduino.h" 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
-#include "c:\pub\ZACONV\combined\combined.ino"
-#include "c:\pub\ZACONV\combined\zaconlogo.c"
+#include "c:\ZaConV\zaconv\badgeCode\src\combined\combined.ino"
+#include "c:\ZaConV\zaconv\badgeCode\src\combined\zaconlogo.c"
 #endif
