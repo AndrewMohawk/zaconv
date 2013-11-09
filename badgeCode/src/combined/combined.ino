@@ -13,7 +13,7 @@ Bounce b3 = Bounce(A2, 10);
 Bounce b4 = Bounce(A1, 10);
 
 //*THIS* badgenumber
-int BadgeNumber = 4040;
+int BadgeNumber = 3030;
 
 //Send Rand Interval things
 long previousMillis = 0;
@@ -336,7 +336,17 @@ void setup()
 	
 		
 	//Play Intro
-	badgeIntro();
+	if(usedBefore == 28)
+	{
+		//another intro?
+		drawZClogo();        
+		myGLCD.invert(false);
+		myGLCD.clrScr();
+	}
+	else
+	{
+		badgeIntro();
+	}
 
 	
 }
@@ -940,6 +950,22 @@ void handleLiveSpeaker(char * entireMessage)
 
 
 }
+void handleBadgeResetMode(char * entireMessage)
+{
+	char verify[5];
+	strncpy(verify,(entireMessage+1),4);
+	verify[4] = '\0';
+	int ageVerify = atoi(verify);
+	if(ageVerify == 1985)
+	{
+		EEPROMWriteInt(0,26); // write badge
+        EEPROMWriteInt(2,0); // write num seen
+		numBadgesSeen = 0;
+		LED_RED();
+		delay(200);
+		LED_OFF();
+	}
+}
 void handleCoolBadgeMode(char * entireMessage)
 {
 	char badgeMode[5];
@@ -1169,6 +1195,9 @@ void parseCmds(uint8_t* buf,int buflen)
 		  break;
 	  case 'U':
 	      handleNickUpdateMode(buf,buflen);
+		  break;
+	  case 'A':
+		  handleBadgeResetMode(entireMessage);
 		  break;
 	  case 'C':
 		  handleCoolBadgeMode(entireMessage);
