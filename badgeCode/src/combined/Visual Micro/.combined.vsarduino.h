@@ -38,15 +38,20 @@ void showSchedule();
 void drawZClogo();
 void badgeIntro();
 void MenuScreen();
+char** str_split(char* a_str, const char a_delim);
 void showWHOAMI();
 void loadTopHeader(char* text);
-void checkForMainMenuCommand();
+void exitToMainMenu();
+void procesButtons();
+void showSavedMessage();
+void procesHandleSave();
 void showStats();
 void MainMenu();
 void showCurrentSpeaker();
 void screenScroll();
 void showLineup();
 void handleLiveSpeaker(char * entireMessage);
+void handleBadgeResetMode(char * entireMessage);
 void handleCoolBadgeMode(char * entireMessage);
 void handleSendMode(char * entireMessage);
 void handleReceiveMode(char * entireMessage);
@@ -67,5 +72,7 @@ void LED_ORANGE();
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\standard\pins_arduino.h" 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
 #include "c:\ZaConV\zaconv\badgeCode\src\combined\combined.ino"
+#include "c:\ZaConV\zaconv\badgeCode\src\combined\EepromUtil.cpp"
+#include "c:\ZaConV\zaconv\badgeCode\src\combined\EepromUtil.h"
 #include "c:\ZaConV\zaconv\badgeCode\src\combined\zaconlogo.c"
 #endif
