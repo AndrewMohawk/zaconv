@@ -421,7 +421,7 @@ void showAbout()
            currentAboutItem--;
        }
    }
-   processButtons();
+   processAButton(b);
 }
 void showLiveSpeaker()
 {
@@ -792,6 +792,12 @@ void exitToMainMenu()
 
 void processButtons()
 {
+    processAButton(readButtons());
+
+}
+
+void processAButton(int buttonID)
+{
     //Calculate the switchid by adding the button and current mode
     //then xoring the mode out , this allows mulitple screens
     //to share the same function code without insanely nested if/elses.
@@ -808,7 +814,6 @@ void processButtons()
 	5: WHOAMI
 	INTRO EXCLUDED -- doesnt need to loop into it
     */
-    int buttonID = readButtons();
     switch(buttonID)
     {
         case 1://Save handle on the WHOAMI screen
