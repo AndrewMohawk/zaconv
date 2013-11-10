@@ -421,7 +421,7 @@ void showAbout()
            currentAboutItem--;
        }
    }
-   procesButtons();
+   procesButtons(b);
 }
 void showLiveSpeaker()
 {
@@ -459,7 +459,7 @@ void showLiveSpeaker()
    
  
    LoadedScreen = 1;
-   procesButtons();
+   procesButtons(-1);
 }
 void showSchedule()
 {
@@ -529,7 +529,7 @@ void showSchedule()
        }
    }
    
-   procesButtons();
+   procesButtons(b);
 }
 
 void drawZClogo()
@@ -698,7 +698,7 @@ void showWHOAMI()
      }
      LoadedScreen = 1;     
   }
-  procesButtons();
+  procesButtons(-1);
 }
 
 void loadTopHeader(char* text)
@@ -717,7 +717,7 @@ void exitToMainMenu()
     currentMode = 0;
 }
 
-void procesButtons()
+void procesButtons(int existingButtonCall)
 {
     //Calculate the switchid by adding the button and current mode 
     //then xoring the mode out , this allows mulitple screens 
@@ -735,7 +735,12 @@ void procesButtons()
 	5: WHOAMI
 	INTRO EXCLUDED -- doesnt need to loop into it	
     */
-    int buttonID = readButtons();
+	int buttonID;
+	if (existingButtonCall < 0)
+	{
+		buttonID = readButtons();
+	}
+	
     switch(buttonID)
     {
         case 1://Save handle on the WHOAMI screen
@@ -802,11 +807,17 @@ void showStats()
 		
 		statsString = "Num Badges Seen:";
 		statsString += numBadgesSeen;
+		
 		myGLCD.print(statsString,LEFT,32);
+
+		statsString = "Free Mem:";
+		statsString += freeMemory();
+
+		myGLCD.print(statsString, LEFT, 39);	
 		myGLCD.update();
 		LoadedScreen = 1;
 	}
-    procesButtons();
+    procesButtons(-1);
 }
 void MainMenu()
 {
