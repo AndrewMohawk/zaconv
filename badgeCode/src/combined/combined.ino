@@ -357,7 +357,14 @@ void showAbout()
 
 	if(LoadedScreen == 0)
 	{
-		loadTopHeader("ABOUT BADGES");
+  	loadTopHeader("ABOUT BADGES");
+
+    // Hypn Code
+    // DEBUG:
+    char* buf = "R1234:5678";
+    handleReceiveMode(buf);
+    buf = "S2468";
+    handleSendMode(buf);
 	}
 
    strcpy_P(currentStr, (char*)pgm_read_word(&(AboutArray[currentAboutItem]))); // Necessary casts and dereferencing, just copy.
@@ -977,7 +984,7 @@ void handleCoolBadgeMode(char * entireMessage)
 	strncpy(badgeMode,(entireMessage+1),4);
 	badgeMode[4] = '\0';
 	int coolmode = atoi(badgeMode);
-	Serial.print("coolmode");Serial.println(coolmode);
+	// Serial.print("coolmode");Serial.println(coolmode);
 	switch (coolmode)
 	{
 		case 1111:
@@ -1117,15 +1124,16 @@ void handleSendMode(char * entireMessage)
            numLastFiveBadges++;
        }
 
-
-
+      // Hypn Code:
+      Serial.print("tweet:Saw badge ");
+      Serial.println(SeenBadge);
+      delay(250);
 }
 
 void handleReceiveMode(char * entireMessage)
 {
 	//Seen a relationship
      //R<NNNN>:<NNNN> - as above
-     //Serial.println("This is a Relationship");
      char BadgeOneC[5];
      strncpy(BadgeOneC,(entireMessage+1),4);
      BadgeOneC[4] = '\0';
@@ -1159,6 +1167,13 @@ void handleReceiveMode(char * entireMessage)
 
        if(seenAlready == false)
        {
+          // Hypn Code:
+          Serial.print("tweet:Saw badge relationship between ");
+          Serial.print(BadgeOneC);
+          Serial.print(" and ");
+          Serial.println(BadgeTwoC);
+          delay(250);
+
            LastFiveRelationships1[numLastFiveRelationships] = badgeOneI;
            LastFiveRelationships2[numLastFiveRelationships] = badgeTwoI;
            numLastFiveRelationships++;
@@ -1186,7 +1201,7 @@ void parseCmds(uint8_t* buf,int buflen)
 {
   char* entireMessage = (char*)buf;
   char message_mode = entireMessage[0];
-  Serial.print("message:");Serial.println(entireMessage);
+  // Serial.print("message:");Serial.println(entireMessage);
   switch (message_mode)
   {
 	  case 'S':
@@ -1211,8 +1226,8 @@ void parseCmds(uint8_t* buf,int buflen)
 
 void showFreeMem()
 {
-    Serial.print("freeMemory()=");
-    Serial.println(freeMemory());
+    // Serial.print("freeMemory()=");
+    // Serial.println(freeMemory());
 }
 
 //new button reader, saves resistors and i have the pins anyway (yes i know resistors are nearly free anyway!)
