@@ -53,7 +53,6 @@ char wearerSite[16];// = "superuser.co.za";
 //Total badges this badge has seen
 int numBadgesSeen = 0;
 
-
 //Last 5 badges seen
 int LastFiveBadges[5];
 //Number of entries in last 5 queue
@@ -298,8 +297,8 @@ void setup()
 	if ((char)lowByte == 'N')
 	{
 		EepromUtil::eeprom_read_string(201, wearerNick, 16);
-		EepromUtil::eeprom_read_string(217, wearerSite, 16);
-		EepromUtil::eeprom_read_string(232, wearerTitle, 16);
+		EepromUtil::eeprom_read_string(217, wearerTitle, 16);
+		EepromUtil::eeprom_read_string(232, wearerSite, 16);
 	}
 	//28 if the badge has been through a power cycle, else its first boot so we set it to 0
 	int usedBefore = EEPROMReadInt(0);
@@ -348,7 +347,7 @@ void setup()
 	{
 		badgeIntro();
 	}
-
+	LED_GREEN();
 	
 }
 
@@ -1109,6 +1108,16 @@ void handleParsing(uint8_t* readBuffer,int readBufferLength,char* writeBuffer)
 	writeBuffer[n] = '\0';
 }
 
+
+void handleNickUpdateMode(uint8_t* buf,int buflen)
+{
+		handleParsing(buf, buflen, wearerNick);
+    	LED_GREEN();
+		delay(200);
+		LED_OFF();
+		LoadedScreen = 0;
+}
+
 void handleTitleUpdateMode(uint8_t* buf, int buflen)
 {
 	handleParsing(buf, buflen, wearerTitle);
@@ -1124,14 +1133,6 @@ void handleSiteUpdateMode(uint8_t* buf, int buflen)
 	delay(200);
 	LED_OFF();
 	LoadedScreen = 0;
-}
-void handleNickUpdateMode(uint8_t* buf,int buflen)
-{
-		handleParsing(buf, buflen, wearerNick);
-    	LED_GREEN();
-		delay(200);
-		LED_OFF();
-		LoadedScreen = 0;
 }
 
 void parseCmds(uint8_t* buf,int buflen)
@@ -1152,6 +1153,7 @@ void parseCmds(uint8_t* buf,int buflen)
 		  break;
 	  case 'U':
 	      handleNickUpdateMode(buf,buflen);
+		  break;
 	  case 'V'://These letters mean nothing , they are just the next letters after U
 		  handleTitleUpdateMode(buf, buflen);
 		  break;
