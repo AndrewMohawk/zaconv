@@ -34,7 +34,7 @@ char badgeNick3[15];// = "runawaycoder";
 
 	0-1: 28 if seen before, else random.
 	2-3: <number badges seen>
-	
+
 	4-5: Seen Badge 1
 	6-7: Seen Badge 2
 	8-9: Seen Badge 3
@@ -109,7 +109,7 @@ prog_char about2[] PROGMEM = "Special thanks to everyone who submitted and made 
 prog_char about3[] PROGMEM = "Keep these badges as tokens of our appreciation";
 prog_char about4[] PROGMEM = "From AndrewMohawk and people@zacon.org.za";
 
-PROGMEM const char *AboutArray[] = 	   
+PROGMEM const char *AboutArray[] =
 {
     about1,
     about2,
@@ -128,7 +128,7 @@ prog_char menu4[] PROGMEM = "Intro";
 prog_char menu5[] PROGMEM = "WHOAMI";
 
 
-PROGMEM const char *MenuArray[] = 	   
+PROGMEM const char *MenuArray[] =
 {
 	menu0,
 	menu1,
@@ -162,7 +162,7 @@ prog_char string_16[] PROGMEM = "17h30-17h45: Dominic White - Close/Awards";
 int currentLiveSpeaker = 0;
 
 PROGMEM const char *Schedule[] =
-{   
+{
   string_0,
   string_1,
   string_2,
@@ -250,22 +250,22 @@ void setup()
 	pinMode(redPin, OUTPUT);
 	pinMode(greenPin, OUTPUT);
 	pinMode(bluePin, OUTPUT);
-	
+
 
 	//Start Serial Comms
 	Serial.begin(9600);
-	
+
 	//Random seed
 	randomSeed(analogRead(0));
 
 	//Random Send Interval
 	randInterval = random(350,2000);
-	
+
 	//Number of menu items (so i can be lazy)
 	numMenuItems = sizeof(MenuArray)/sizeof(char *);
 	numScheduleItems = sizeof(Schedule)/sizeof(char *);
-	
-	
+
+
 	//Current speaker scroll size
 	SpeakerScrollSize = strlen(currentSpeaker);
 
@@ -274,11 +274,11 @@ void setup()
 	*/
 	myGLCD.InitLCD(70);
 	myGLCD.setFont(SmallFont);
-	
-	//pinMode(A5, INPUT_PULLUP);	
+
+	//pinMode(A5, INPUT_PULLUP);
 	//delay(1000);
 
-	
+
 	/*
 		RF Init
 	*/
@@ -287,7 +287,7 @@ void setup()
 	vw_set_ptt_inverted(true); // Required for DR3100
 	vw_setup(2000);	 // Bits per sec
 	vw_rx_start();       // Start the receiver PLL running
-	
+
 
 
 
@@ -312,7 +312,7 @@ void setup()
         EEPROMWriteInt(2,0); // write num seen
 	}
 
-	
+
 	//Clear variables
 	for (int i=0;i<5;i++)
 	{
@@ -321,10 +321,10 @@ void setup()
 		LastFiveRelationships2[i] = random(1111,9999);
 	}
 
-	
-	
+
+
 	//Setup buttons, analog pins (used as digital) 1-4 for buttons 1-4
-	
+
 	pinMode(A1,INPUT);
 	digitalWrite(A1, HIGH);
 	pinMode(A2,INPUT);
@@ -333,13 +333,13 @@ void setup()
 	digitalWrite(A3, HIGH);
 	pinMode(A4,INPUT);
 	digitalWrite(A4, HIGH);
-	
-		
+
+
 	//Play Intro
 	if(usedBefore == 28)
 	{
 		//another intro?
-		drawZClogo();        
+		drawZClogo();
 		myGLCD.invert(false);
 		myGLCD.clrScr();
 	}
@@ -348,28 +348,35 @@ void setup()
 		badgeIntro();
 	}
 
-	
+
 }
 
 
 void showAbout()
 {
-   
+
 	if(LoadedScreen == 0)
 	{
-		loadTopHeader("ABOUT BADGES");
+  	loadTopHeader("ABOUT BADGES");
+
+    // Hypn Code
+    // DEBUG:
+    char* buf = "R1234:5678";
+    handleReceiveMode(buf);
+    buf = "S2468";
+    handleSendMode(buf);
 	}
 
-   strcpy_P(currentStr, (char*)pgm_read_word(&(AboutArray[currentAboutItem]))); // Necessary casts and dereferencing, just copy. 
+   strcpy_P(currentStr, (char*)pgm_read_word(&(AboutArray[currentAboutItem]))); // Necessary casts and dereferencing, just copy.
 
-   
-   
+
+
    int numChars = strlen(currentStr);
    int charsPerRow = 20;
    int numRows = (numChars / charsPerRow) + 1;
 
-  
-   
+
+
    for(int x=0;x<numRows;x++)
    {
      int rowStart = (x*charsPerRow);
@@ -383,16 +390,16 @@ void showAbout()
            thisLine += currentStr[y];
          }
      }
-     
+
      myGLCD.print(thisLine,0,25+(x*6));
      myGLCD.update();
    }
 
    LoadedScreen = 1;
-   
-   
+
+
    int b = readButtons();
-   
+
    if(b == 2)
    {
        LoadedScreen = 0;
@@ -421,7 +428,7 @@ void showAbout()
            currentAboutItem--;
        }
    }
-   procesButtons();
+   processAButton(b);
 }
 void showLiveSpeaker()
 {
@@ -429,15 +436,15 @@ void showLiveSpeaker()
 	{
 		myGLCD.clrScr();
 		loadTopHeader("");
-	
-	strcpy_P(currentStr, (char*)pgm_read_word(&(Schedule[currentLiveSpeaker]))); // Necessary casts and dereferencing, just copy. 
-   
+
+	strcpy_P(currentStr, (char*)pgm_read_word(&(Schedule[currentLiveSpeaker]))); // Necessary casts and dereferencing, just copy.
+
    int numChars = strlen(currentStr);
    int charsPerRow = 20;
    int numRows = (numChars / charsPerRow) + 1;
 
-  
-   
+
+
    for(int x=0;x<numRows;x++)
    {
      int rowStart = (x*charsPerRow);
@@ -456,8 +463,8 @@ void showLiveSpeaker()
      myGLCD.update();
    }
 }
-   
- 
+
+
    LoadedScreen = 1;
    int b = readButtons();
    if(b == 4)
@@ -468,20 +475,20 @@ void showLiveSpeaker()
 }
 void showSchedule()
 {
-   
+
 	if(LoadedScreen == 0)
 	{
 		myGLCD.clrScr();
 		loadTopHeader("");
 	}
-   strcpy_P(currentStr, (char*)pgm_read_word(&(Schedule[currentScheduleItem]))); // Necessary casts and dereferencing, just copy. 
-   
+   strcpy_P(currentStr, (char*)pgm_read_word(&(Schedule[currentScheduleItem]))); // Necessary casts and dereferencing, just copy.
+
    int numChars = strlen(currentStr);
    int charsPerRow = 20;
    int numRows = (numChars / charsPerRow) + 1;
 
-  
-   
+
+
    for(int x=0;x<numRows;x++)
    {
      int rowStart = (x*charsPerRow);
@@ -499,11 +506,11 @@ void showSchedule()
      myGLCD.print(thisLine,0,18+(x*6));
      myGLCD.update();
    }
-   
- 
+
+
    LoadedScreen = 1;
-   
-   
+
+
    int b = readButtons();
 
    if(b == 2)
@@ -541,8 +548,8 @@ void showSchedule()
    }
 
 
-   
-   
+
+
 }
 
 void drawZClogo()
@@ -555,13 +562,13 @@ void drawZClogo()
 
 void badgeIntro()
 {
-    drawZClogo();        
+    drawZClogo();
     screenScroll();
-    
-    
-    drawZClogo();        
+
+
+    drawZClogo();
     myGLCD.invert(false);
-    
+
     myGLCD.clrScr();
     //showLineup();
 }
@@ -570,14 +577,14 @@ void MenuScreen()
 {
     if(LoadedScreen == 0)
     {
-	  
+
       loadTopHeader("www.zacon.org.za");
       MainMenu();
       LoadedScreen = 1;
-	  
+
     }
-	
-    
+
+
     int b = readButtons();
     switch(b){
         case 1:
@@ -605,8 +612,8 @@ void MenuScreen()
             break;
         case 3:
 
-            /* 
-               MENU ITEMS 
+            /*
+               MENU ITEMS
                ----------
                 0: Schedule
                 1: Live Speaker
@@ -629,7 +636,7 @@ void MenuScreen()
             if(defaultMenu == 0) // schedule
             {
                 Serial.println("loading schedule");
-                currentMode = 1; 
+                currentMode = 1;
             }
             else if(defaultMenu == 1) //Live Speaker
             {
@@ -749,7 +756,7 @@ void showWHOAMI()
 {
   if(LoadedScreen == 0 )
   {
-	 
+
      if(strlen(badgeNick1) > 0)
      {
        myGLCD.clrScr();
@@ -769,9 +776,9 @@ void showWHOAMI()
        myGLCD.print("No Handle Set",CENTER,25);
        myGLCD.update();
      }
-     LoadedScreen = 1;     
+     LoadedScreen = 1;
   }
-  procesButtons();
+  processButtons();
 }
 
 void loadTopHeader(char* text)
@@ -790,13 +797,19 @@ void exitToMainMenu()
     currentMode = 0;
 }
 
-void procesButtons()
+void processButtons()
 {
-    //Calculate the switchid by adding the button and current mode 
-    //then xoring the mode out , this allows mulitple screens 
+    processAButton(readButtons());
+
+}
+
+void processAButton(int buttonID)
+{
+    //Calculate the switchid by adding the button and current mode
+    //then xoring the mode out , this allows mulitple screens
     //to share the same function code without insanely nested if/elses.
-    /* 
-	LCD/Mode Loop 
+    /*
+	LCD/Mode Loop
 	-------------
 
 	Modes:
@@ -806,9 +819,8 @@ void procesButtons()
 	3: About
 	4: Stats
 	5: WHOAMI
-	INTRO EXCLUDED -- doesnt need to loop into it	
+	INTRO EXCLUDED -- doesnt need to loop into it
     */
-    int buttonID = readButtons();
     switch(buttonID)
     {
         case 1://Save handle on the WHOAMI screen
@@ -836,7 +848,7 @@ void procesButtons()
 				case 5:
                     vw_send((uint8_t*)"C5555", 5);
                     vw_wait_tx();
-			}       
+			}
             break;
         case 4://General navigate to main menu function
             exitToMainMenu();
@@ -868,27 +880,27 @@ void showStats()
 	{
 		loadTopHeader("Stats");
 		myGLCD.setFont(TinyFont);
-	
+
 		String statsString = "Badge Number:";
 		statsString += BadgeNumber;
 		myGLCD.print(statsString,LEFT,25);
-		
+
 		statsString = "Num Badges Seen:";
 		statsString += numBadgesSeen;
 		myGLCD.print(statsString,LEFT,32);
 		myGLCD.update();
 		LoadedScreen = 1;
 	}
-    procesButtons();
+    processButtons();
 }
 void MainMenu()
 {
   myGLCD.setFont(SmallFont);
-  myGLCD.print("MENU",CENTER,25);  
+  myGLCD.print("MENU",CENTER,25);
   myGLCD.setFont(TinyFont);
   //myGLCD.print("                                                                                    ",0,35);
-  strcpy_P(currentStr, (char*)pgm_read_word(&(MenuArray[defaultMenu]))); // Necessary casts and dereferencing, just copy. 
-  myGLCD.print(currentStr,CENTER,35);  
+  strcpy_P(currentStr, (char*)pgm_read_word(&(MenuArray[defaultMenu]))); // Necessary casts and dereferencing, just copy.
+  myGLCD.print(currentStr,CENTER,35);
   myGLCD.update();
   myGLCD.setFont(SmallFont);
 }
@@ -972,7 +984,7 @@ void handleCoolBadgeMode(char * entireMessage)
 	strncpy(badgeMode,(entireMessage+1),4);
 	badgeMode[4] = '\0';
 	int coolmode = atoi(badgeMode);
-	Serial.print("coolmode");Serial.println(coolmode);
+	// Serial.print("coolmode");Serial.println(coolmode);
 	switch (coolmode)
 	{
 		case 1111:
@@ -1028,7 +1040,7 @@ void handleCoolBadgeMode(char * entireMessage)
 				delay(5);
 			}
 			break;
-		
+
 		case 4444:
 			/* WHAT ABOOUTBLUE */
 			for(int i=0;i<255;i++)
@@ -1062,14 +1074,14 @@ void handleSendMode(char * entireMessage)
 {
 	//Seen a Badge
        //S<NNNN> where NNNN = badge
-       
+
        char SeenBadge[5];
        strncpy(SeenBadge,(entireMessage+1),4);
        SeenBadge[4] = '\0';
        int badgeNum = atoi(SeenBadge);
-        
+
        boolean seenAlready = false;
-	  
+
        for(int i=0;i<=numBadgesSeen;i++)
        {
 		 int EEPROMBadge = EEPROMReadInt( ((i*2)+2) );
@@ -1077,9 +1089,9 @@ void handleSendMode(char * entireMessage)
          {
            seenAlready = true;
          }
-		 
+
        }
-       
+
        if(seenAlready == false)
        {
 			numBadgesSeen = numBadgesSeen + 1;
@@ -1090,9 +1102,9 @@ void handleSendMode(char * entireMessage)
 			LED_OFF();
 
        }
-       
-       
-       
+
+
+
        seenAlready = false;
        for(int i=0;i<numLastFiveBadges;i++)
        {
@@ -1101,7 +1113,7 @@ void handleSendMode(char * entireMessage)
              seenAlready = true;
            }
        }
-      
+
        if(seenAlready == false)
        {
            if(numLastFiveBadges == 5)
@@ -1111,26 +1123,27 @@ void handleSendMode(char * entireMessage)
            LastFiveBadges[numLastFiveBadges] = badgeNum;
            numLastFiveBadges++;
        }
-       
-       
-   
+
+      // Hypn Code:
+      Serial.print("tweet:Saw badge ");
+      Serial.println(SeenBadge);
+      delay(250);
 }
 
 void handleReceiveMode(char * entireMessage)
 {
 	//Seen a relationship
      //R<NNNN>:<NNNN> - as above
-     //Serial.println("This is a Relationship");
      char BadgeOneC[5];
      strncpy(BadgeOneC,(entireMessage+1),4);
      BadgeOneC[4] = '\0';
      int badgeOneI = atoi(BadgeOneC);
-     
+
      char BadgeTwoC[5];
      strncpy(BadgeTwoC,(entireMessage+6),4);
      BadgeTwoC[4] = '\0';
      int badgeTwoI = atoi(BadgeTwoC);
-     
+
      if(badgeOneI == BadgeNumber || badgeTwoI == BadgeNumber)
      {
        //Ignore
@@ -1138,7 +1151,7 @@ void handleReceiveMode(char * entireMessage)
      else
      {
        boolean seenAlready = false;
-     
+
        for(int i=0;i<numLastFiveRelationships;i++)
        {
            if(LastFiveRelationships1[i] == badgeOneI && LastFiveRelationships2[i] == badgeTwoI)
@@ -1149,11 +1162,18 @@ void handleReceiveMode(char * entireMessage)
            {
                seenAlready = true;
            }
-           
+
        }
-       
+
        if(seenAlready == false)
        {
+          // Hypn Code:
+          Serial.print("tweet:Saw badge relationship between ");
+          Serial.print(BadgeOneC);
+          Serial.print(" and ");
+          Serial.println(BadgeTwoC);
+          delay(250);
+
            LastFiveRelationships1[numLastFiveRelationships] = badgeOneI;
            LastFiveRelationships2[numLastFiveRelationships] = badgeTwoI;
            numLastFiveRelationships++;
@@ -1181,11 +1201,11 @@ void parseCmds(uint8_t* buf,int buflen)
 {
   char* entireMessage = (char*)buf;
   char message_mode = entireMessage[0];
-  Serial.print("message:");Serial.println(entireMessage);
+  // Serial.print("message:");Serial.println(entireMessage);
   switch (message_mode)
   {
 	  case 'S':
-		  handleSendMode(entireMessage);           
+		  handleSendMode(entireMessage);
 		  break;
 	  case 'L':
 		  handleLiveSpeaker(entireMessage);
@@ -1206,8 +1226,8 @@ void parseCmds(uint8_t* buf,int buflen)
 
 void showFreeMem()
 {
-    Serial.print("freeMemory()=");
-    Serial.println(freeMemory());
+    // Serial.print("freeMemory()=");
+    // Serial.println(freeMemory());
 }
 
 //new button reader, saves resistors and i have the pins anyway (yes i know resistors are nearly free anyway!)
@@ -1287,11 +1307,11 @@ void LED_ORANGE()
 
 
 void loop()
-{  
-  
-  
-  /* 
-	LCD/Mode Loop 
+{
+
+
+  /*
+	LCD/Mode Loop
 	-------------
 
 	Modes:
@@ -1301,8 +1321,8 @@ void loop()
 	3: About
 	4: Stats
 	5: WHOAMI
-	INTRO EXCLUDED -- doesnt need to loop into it	
-  
+	INTRO EXCLUDED -- doesnt need to loop into it
+
   */
 
   switch(currentMode) {
@@ -1328,25 +1348,25 @@ void loop()
 
   /* RF Loop */
 
-  
+
   uint8_t buf[VW_MAX_MESSAGE_LEN];
   uint8_t buflen = VW_MAX_MESSAGE_LEN;
   unsigned long currentMillis = millis();
- 
- 
-  if(currentMillis - previousMillis > randInterval) 
+
+
+  if(currentMillis - previousMillis > randInterval)
   {
-	previousMillis = currentMillis;  
+	previousMillis = currentMillis;
     randInterval = random(1000,4000);
-    
+
     sprintf(currentRFStr,"S%i",BadgeNumber);
-	
+
     vw_send((uint8_t *)currentRFStr, 6);
     vw_wait_tx(); // Wait until the whole message is gone
     LED_OFF();
-    
+
 	/*
-	So ideally if it was a bit quicker id love to send all 5 last badges ive seen 
+	So ideally if it was a bit quicker id love to send all 5 last badges ive seen
 	as well as the last 5 relationships i've seen, but its not gonna happen unless
 	you dont want the menu system to work. so we are gonna just random it.
 	*/
@@ -1367,7 +1387,7 @@ void loop()
         vw_wait_tx(); // Wait until the whole message is gone
 	}
   }
-  
+
   if (vw_get_message(buf, &buflen)) // Non-blocking
   {
 	/* LED EATS POWER! STOP USING IT FOR ANY VALID SIGNAL! */
