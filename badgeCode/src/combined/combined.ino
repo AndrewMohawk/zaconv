@@ -20,9 +20,10 @@ long previousMillis = 0;
 long randInterval = 1500;
 
 // = "RC1140|Dev|runawaycoder"
-char badgeNick1[15];// = "RC1140";
-char badgeNick2[15];// = "Dev";
-char badgeNick3[15];// = "runawaycoder";
+char wearerNick[16];// = "RC1140";
+char wearerTitle[16];// = "Dev";
+char wearerSite[16];// = "superuser.co.za";
+
 //All badges seen
 //int BadgesIveSeen[100];
 //LOL @ trying to use RAM for that.. 2K >_< *facepalm*.. all badges now stored in EEPROM, 0 = this badge, 1 = badge seen 1.
@@ -242,9 +243,9 @@ unsigned int EEPROMReadInt(int p_address)
 void setup()
 {
     //Always init to 0 so that we can check later if a sync has been completed
-	badgeNick1[0] = 0;
-	badgeNick2[0] = 0;
-	badgeNick3[0] = 0;
+	wearerNick[0] = 0;
+	wearerSite[0] = 0;
+	wearerTitle[0] = 0;
 
 	//Setup RBG LED
 	pinMode(redPin, OUTPUT);
@@ -296,9 +297,9 @@ void setup()
 	//If we have a nick Char set then try and load anything at address 201
 	if ((char)lowByte == 'N')
 	{
-		EepromUtil::eeprom_read_string(201, badgeNick1, 15);
-		EepromUtil::eeprom_read_string(216, badgeNick2, 15);
-		EepromUtil::eeprom_read_string(231, badgeNick3, 15);
+		EepromUtil::eeprom_read_string(201, wearerNick, 16);
+		EepromUtil::eeprom_read_string(217, wearerSite, 16);
+		EepromUtil::eeprom_read_string(232, wearerTitle, 16);
 	}
 	//28 if the badge has been through a power cycle, else its first boot so we set it to 0
 	int usedBefore = EEPROMReadInt(0);
@@ -524,15 +525,7 @@ void showSchedule()
            currentScheduleItem--;
        }
    }
-   if(b == 4)
-   {
-       LoadedScreen = 0;
-       currentMode = 0;
-   }
-
-
-   
-   
+   procesButtons();
 }
 
 void drawZClogo()
@@ -691,48 +684,6 @@ void MenuScreen()
 }
 
 
-char** str_split(char* a_str, const char a_delim)
-{
-	char** result = 0;
-	size_t count = 0;
-	char* tmp = a_str;
-	char* last_comma = 0;
-
-	/* Count how many elements will be extracted. */
-	while (*tmp)
-	{
-		if (a_delim == *tmp)
-		{
-			count++;
-			last_comma = tmp;
-		}
-		tmp++;
-	}
-
-	/* Add space for trailing token. */
-	count += last_comma < (a_str + strlen(a_str) - 1);
-
-	/* Add space for terminating null string so caller
-	*        knows where the list of returned strings ends. */
-	count++;
-
-	result = (char**)malloc(sizeof(char*)* count);
-
-	if (result)
-	{
-		size_t idx = 0;
-		char* token = strtok(a_str, "|");
-
-		while (token)
-		{
-			*(result + idx++) = strdup(token);
-			token = strtok(0, "|");
-		}
-		*(result + idx) = 0;
-	}
-
-	return result;
-}
 
 //"RC1140|Dev|Test.co.za";
 void showWHOAMI()
@@ -740,15 +691,15 @@ void showWHOAMI()
   if(LoadedScreen == 0 )
   {
 	 
-     if(strlen(badgeNick1) > 0)
+     if(strlen(wearerNick) > 0)
      {
        myGLCD.clrScr();
 	   loadTopHeader("WHOAMI");
        myGLCD.setFont(SmallFont);
 
-	   myGLCD.print(badgeNick1, CENTER, 24);
-	   myGLCD.print(badgeNick2, CENTER, 32);
-	   myGLCD.print(badgeNick3, CENTER, 40);
+	   myGLCD.print(wearerNick, CENTER, 24);
+	   myGLCD.print(wearerTitle, CENTER, 32);
+	   myGLCD.print(wearerSite, CENTER, 40);
        myGLCD.update();
      }
      else
@@ -845,9 +796,9 @@ void showSavedMessage()
 void procesHandleSave()
 {
 	EepromUtil::eeprom_write_string(200, "N");
-	EepromUtil::eeprom_write_string(201, badgeNick1);
-	EepromUtil::eeprom_write_string(216, badgeNick2);
-	EepromUtil::eeprom_write_string(231, badgeNick3);
+	EepromUtil::eeprom_write_string(201, wearerNick);
+	EepromUtil::eeprom_write_string(217, wearerTitle);
+	EepromUtil::eeprom_write_string(232, wearerSite);
 	showSavedMessage();
 }
 
@@ -876,7 +827,6 @@ void MainMenu()
   myGLCD.setFont(SmallFont);
   myGLCD.print("MENU",CENTER,25);  
   myGLCD.setFont(TinyFont);
-  //myGLCD.print("                                                                                    ",0,35);
   strcpy_P(currentStr, (char*)pgm_read_word(&(MenuArray[defaultMenu]))); // Necessary casts and dereferencing, just copy. 
   myGLCD.print(currentStr,CENTER,35);  
   myGLCD.update();
@@ -940,54 +890,60 @@ void handleLiveSpeaker(char * entireMessage)
 
 
 }
+void flashPatternColor(char* flashPattern)
+{
+	for (int i = 0; i < strlen(flashPattern); i++)
+	{
+		flashPatternColor(&flashPattern[i]);
+
+	}
+}
+void flashSinglePatternColor(char colorCode)
+{
+	switch (colorCode)
+	{
+		case 'B':
+			LED_BLUE();
+			break;
+		case 'G':
+			LED_GREEN();
+			break;
+		case 'P':
+			LED_PURPLE();
+			break;
+		case 'R':
+			LED_RED();
+		case 'O':
+			LED_ORANGE();
+		case 'W':
+			LED_WHITE();
+			break;
+	}
+	delay(200);
+}
 void handleCoolBadgeMode(char * entireMessage)
 {
 	char badgeMode[5];
 	strncpy(badgeMode,(entireMessage+1),4);
 	badgeMode[4] = '\0';
 	int coolmode = atoi(badgeMode);
-	Serial.print("coolmode");Serial.println(coolmode);
+	//Serial.print("coolmode");Serial.println(coolmode);
+	char flashPattern[10] = { "BGPROW" };
 	switch (coolmode)
 	{
 		case 1111:
 			/* ITS THE 5-0! */
 			for(int x=0;x<3;x++)
 			{
-			LED_RED();
-			delay(200);
-			LED_BLUE();
-			delay(200);
-			LED_WHITE();
-			delay(200);
-			LED_RED();
-			delay(200);
-			LED_BLUE();
-			delay(200);
-			LED_WHITE();
-			delay(200);
-			LED_RED();
-			delay(200);
-			LED_BLUE();
-			delay(200);
-			LED_WHITE();
-			delay(200);
-			LED_OFF();
+				sprintf(flashPattern, "%s", "RBWRBWRBW");
+				flashPatternColor(flashPattern);
+				LED_OFF();
 			}
 			break;
 		case 2222:
 			/* OUTOFIDASNOW */
-			LED_BLUE();
-			delay(200);
-			LED_GREEN();
-			delay(200);
-			LED_PURPLE();
-			delay(200);
-			LED_RED();
-			delay(200);
-			LED_ORANGE();
-			delay(200);
-			LED_WHITE();
-			delay(200);
+			sprintf(flashPattern, "%s", "BGPROW");
+			flashPatternColor(flashPattern);
 			break;
 		case 3333:
 			/* WHAT ABOOUTBLUE */
@@ -1139,12 +1095,34 @@ void handleReceiveMode(char * entireMessage)
      }
 }
 
+void handleParsing(uint8_t* readBuffer,int readBufferLength,char* writeBuffer)
+{
+	int n;
+	for (n = 1; n < readBufferLength && n < 80; n++){
+		writeBuffer[n - 1] = readBuffer[n];
+	}
+	writeBuffer[n] = '\0';
+}
 
+void handleTitleUpdateMode(uint8_t* buf, int buflen)
+{
+	handleParsing(buf, buflen, wearerTitle);
+	LED_BLUE();
+	delay(200);
+	LED_OFF();
+	LoadedScreen = 0;
+}
+void handleSiteUpdateMode(uint8_t* buf, int buflen)
+{
+	handleParsing(buf, buflen, wearerSite);
+	LED_RED();
+	delay(200);
+	LED_OFF();
+	LoadedScreen = 0;
+}
 void handleNickUpdateMode(uint8_t* buf,int buflen)
 {
-		sprintf(badgeNick1, "%.12s", buf+1);
-		sprintf(badgeNick2, "%.12s", buf+16);
-		sprintf(badgeNick3, "%.12s", buf+32);
+		handleParsing(buf, buflen, wearerNick);
     	LED_GREEN();
 		delay(200);
 		LED_OFF();
@@ -1169,7 +1147,11 @@ void parseCmds(uint8_t* buf,int buflen)
 		  break;
 	  case 'U':
 	      handleNickUpdateMode(buf,buflen);
+	  case 'V'://These letters mean nothing , they are just the next letters after U
+		  handleTitleUpdateMode(buf, buflen);
 		  break;
+	  case 'W'://These letters mean nothing , they are just the next letters after U
+		  handleSiteUpdateMode(buf, buflen);
 	  case 'C':
 		  handleCoolBadgeMode(entireMessage);
   }
