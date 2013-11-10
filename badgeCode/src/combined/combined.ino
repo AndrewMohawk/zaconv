@@ -460,12 +460,7 @@ void showLiveSpeaker()
    
  
    LoadedScreen = 1;
-   int b = readButtons();
-   if(b == 4)
-   {
-       LoadedScreen = 0;
-       currentMode = 0;
-   }
+   procesButtons();
 }
 void showSchedule()
 {
@@ -506,7 +501,20 @@ void showSchedule()
    
    
    int b = readButtons();
-
+   if (b == 1)
+   {
+	   LoadedScreen = 0;
+	   myGLCD.clrScr();
+	   myGLCD.update();
+	   if (currentScheduleItem == 0)
+	   {
+		   currentScheduleItem = numScheduleItems - 1;
+	   }
+	   else
+	   {
+		   currentScheduleItem--;
+	   }
+   }
    if(b == 2)
    {
        LoadedScreen = 0;
@@ -521,20 +529,7 @@ void showSchedule()
          currentScheduleItem++;
        }
    }
-   if(b == 1)
-   {
-       LoadedScreen = 0;
-       myGLCD.clrScr();
-       myGLCD.update();
-       if(currentScheduleItem == 0)
-       {
-           currentScheduleItem = numScheduleItems - 1;
-       }
-       else
-       {
-           currentScheduleItem--;
-       }
-   }
+   
    procesButtons();
 }
 
@@ -651,6 +646,7 @@ void MenuScreen()
             currentMode = 0;
 			int x = -1;
 			randomSeed(analogRead(0));
+			
 			if(BadgeNumber > 2000) // Attendees
 			{
 				x = 5;
@@ -663,37 +659,18 @@ void MenuScreen()
 			{
 				x= random(1,5);
 			}
-
-			if(x == 1)
-			{
-				vw_send((uint8_t*)"C1111", 5);
-				vw_wait_tx();
-			}
-			if(x == 2)
-			{
-				vw_send((uint8_t*)"C2222", 5);
-				vw_wait_tx();
-			}
-			if(x == 3)
-			{
-				vw_send((uint8_t*)"C3333", 5);
-				vw_wait_tx();
-			}
-			if(x == 4)
-			{
-				vw_send((uint8_t*)"C4444", 5);
-				vw_wait_tx();
-			}
-			if(x == 5)
-			{
-				vw_send((uint8_t*)"C5555", 5);
-				vw_wait_tx();
-			}
+			char cBadgeCode[5];
+			sprintf(cBadgeCode, "C%.4d",x);
+			sendCoolBadgeCode(cBadgeCode);
             break;
     }
 }
 
-
+void sendCoolBadgeCode(char* badgeCode)
+{
+	vw_send((uint8_t*)badgeCode, 5);
+	vw_wait_tx();
+}
 
 //"RC1140|Dev|Test.co.za";
 void showWHOAMI()
