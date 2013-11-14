@@ -13,16 +13,19 @@ Bounce b3 = Bounce(A2, 10);
 Bounce b4 = Bounce(A1, 10);
 
 //*THIS* badgenumber
-int BadgeNumber = 3030;
+int BadgeNumber = 4337;
 
 //Send Rand Interval things
 long previousMillis = 0;
 long randInterval = 1500;
+//interval for sends, between 1 and 30 seconds.
+int minRand = 1000;
+int maxRand = 30000;
 
-// = "RC1140|Dev|runawaycoder"
-char wearerNick[16];// = "RC1140";
-char wearerTitle[16];// = "Dev";
-char wearerSite[16];// = "superuser.co.za";
+
+char wearerNick[16];
+char wearerTitle[16];
+char wearerSite[16];
 
 //All badges seen
 //int BadgesIveSeen[100];
@@ -145,7 +148,7 @@ prog_char string_0[] PROGMEM = "08h00-0900: Coffee and Registration";   // "Stri
 prog_char string_1[] PROGMEM = "09h00-09h15: Dominic White - Welcome to ZaCon V";
 prog_char string_2[] PROGMEM = "09h15-09h45: Mark Cosijn - Vehicle CAN-fu";
 prog_char string_3[] PROGMEM = "09h45-10h10: Jason 's0nic2k' Mitchell - Mains Signalling";
-prog_char string_4[] PROGMEM = "10h10-10h25: TBA";
+prog_char string_4[] PROGMEM = "10h10-10h25: Andrew MacPherson - Badger Badger Badger, Mushroom Mushroom";
 prog_char string_5[] PROGMEM = "10h25-10h40: Tea Break";
 prog_char string_6[] PROGMEM = "10h40-11h25: Jeremy du Bruyn - RAT-a-tat-tat: Taking the fight to RAT controllers";
 prog_char string_7[] PROGMEM = "11h25-12h05: Marcos Alvares - Automating Detection of Obfuscated Obfuscation...";
@@ -253,13 +256,13 @@ void setup()
 	
 
 	//Start Serial Comms
-	Serial.begin(9600);
+	//Serial.begin(9600); // Ross' App
 	
 	//Random seed
 	randomSeed(analogRead(0));
 
 	//Random Send Interval
-	randInterval = random(350,2000);
+	randInterval = random(minRand,maxRand);
 	
 	//Number of menu items (so i can be lazy)
 	numMenuItems = sizeof(MenuArray)/sizeof(char *);
@@ -272,7 +275,7 @@ void setup()
 	/*
 		LCD INIT
 	*/
-	myGLCD.InitLCD(70);
+	myGLCD.InitLCD(60);
 	myGLCD.setFont(SmallFont);
 	
 	//pinMode(A5, INPUT_PULLUP);	
@@ -348,6 +351,8 @@ void setup()
 		badgeIntro();
 	}
 	LED_GREEN();
+	delay(200);
+	LED_OFF();
 	
 }
 
@@ -615,7 +620,7 @@ void MenuScreen()
 
             if(defaultMenu == 0) // schedule
             {
-                Serial.println("loading schedule");
+                //Serial.println("loading schedule");
                 currentMode = 1; 
             }
             else if(defaultMenu == 1) //Live Speaker
@@ -646,21 +651,45 @@ void MenuScreen()
 			int x = -1;
 			randomSeed(analogRead(0));
 			
-			if(BadgeNumber > 2000) // Attendees
+			if(BadgeNumber > 4000) // Attendees
 			{
 				x = 5;
 			}
 			if (BadgeNumber > 3000) // Speakers
 			{
-				x = random(2,5);
+				x = random(3,5);
 			}
-			if (BadgeNumber > 4000) // Ubers
+			if (BadgeNumber > 2000	) // BYOB's
+			{
+				x= random(2,5);
+			}
+			if (BadgeNumber > 1000) // Ubers
 			{
 				x= random(1,5);
 			}
-			char cBadgeCode[5];
-			sprintf(cBadgeCode, "C%.4d",x);
-			sendCoolBadgeCode(cBadgeCode);
+			char cBadgeCode[6];
+			if(x == 1)
+			{
+				sendCoolBadgeCode("C1111");
+			}
+			if(x == 2)
+			{
+				sendCoolBadgeCode("C2222");
+			}
+			if(x == 3)
+			{
+				sendCoolBadgeCode("C3333");
+			}
+			if(x == 4)
+			{
+				sendCoolBadgeCode("C4444");
+			}
+			if(x == 5)
+			{
+				sendCoolBadgeCode("C5555");
+			}
+			
+			//sendCoolBadgeCode(cBadgeCode);
             break;
     }
 }
@@ -747,8 +776,6 @@ void procesButtons(int existingButtonCall)
 			switch (currentMode)
 			{
 				case 5:
-                    vw_send((uint8_t*)"C3333", 5);
-                    vw_wait_tx();
 					procesHandleSave();
 					break;
 			}
@@ -757,8 +784,6 @@ void procesButtons(int existingButtonCall)
             switch (currentMode)
 			{
 				case 5:
-                    vw_send((uint8_t*)"C4444", 5);
-                    vw_wait_tx();
 					break;
 			}
             break;
@@ -766,10 +791,14 @@ void procesButtons(int existingButtonCall)
             switch (currentMode)
 			{
 				case 5:
-                    vw_send((uint8_t*)"C5555", 5);
-                    vw_wait_tx();
+					if(BadgeNumber > 1000 && BadgeNumber < 2000)
+					{
+					
+					sendCoolBadgeCode("C1111");
+					}
+				break;
 			}       
-            break;
+            
         case 4://General navigate to main menu function
             exitToMainMenu();
             break;
@@ -821,6 +850,8 @@ void showStats()
 }
 void MainMenu()
 {
+	if(LoadedScreen == 0)
+	{
   myGLCD.setFont(SmallFont);
   myGLCD.print("MENU",CENTER,25);  
   myGLCD.setFont(TinyFont);
@@ -828,10 +859,14 @@ void MainMenu()
   myGLCD.print(currentStr,CENTER,35);  
   myGLCD.update();
   myGLCD.setFont(SmallFont);
+  LoadedScreen = 1;
+	}
 }
 
 void showCurrentSpeaker()
 {
+	if(LoadedScreen == 0)
+	{
     //Serial.print(SpeakerScrollCurrent);
     if(SpeakerScrollCurrent < -(SpeakerScrollSize*6))
     {
@@ -847,6 +882,8 @@ void showCurrentSpeaker()
     myGLCD.print(currentSpeaker,SpeakerScrollCurrent,40);
     myGLCD.setFont(SmallFont);
     myGLCD.update();
+	LoadedScreen = 1;
+	}
 }
 
 /*
@@ -930,6 +967,8 @@ void handleBadgeResetMode(char * entireMessage)
 		EEPROMWriteInt(0,26); // write badge
         EEPROMWriteInt(2,0); // write num seen
 		numBadgesSeen = 0;
+		numLastFiveBadges = 0;
+		numLastFiveRelationships = 0;
 		LED_RED();
 		delay(200);
 		LED_OFF();
@@ -943,25 +982,62 @@ void handleCoolBadgeMode(char * entireMessage)
 	badgeMode[4] = '\0';
 	int coolmode = atoi(badgeMode);
 	//Serial.print("coolmode");Serial.println(coolmode);
-	char flashPattern[10] = { "BGPROW" };
+	
+	if (BadgeNumber > 3000)
+	{
+	myGLCD.clrScr();
+	myGLCD.setFont(SmallFont);
+	loadTopHeader("");
+	if(BadgeNumber > 4000) // Attendees
+	{
+		myGLCD.print("OWNED",CENTER,25);
+	}
+	else if (BadgeNumber > 3000) // Speakers
+	{
+		myGLCD.print("THANKS!",CENTER,25);
+	}
+	myGLCD.update();
+
+		
+	
 	switch (coolmode)
 	{
 		case 1111:
 			/* ITS THE 5-0! */
 			for(int x=0;x<3;x++)
 			{
-				sprintf(flashPattern, "%s", "RBWRBWRBW");
-				flashPatternColor(flashPattern);
+				LED_RED();
+				delay(200);
+				LED_BLUE();
+				delay(200);
+				LED_WHITE();
+				delay(200);
+				LED_RED();
+				delay(200);
+				LED_BLUE();
+				delay(200);
+				LED_WHITE();
+				delay(200);
+			
 				LED_OFF();
 			}
 			break;
 		case 2222:
-			/* OUTOFIDASNOW */
-			sprintf(flashPattern, "%s", "BGPROW");
-			flashPatternColor(flashPattern);
+			/* OUTOFIDEASNOW */
+			LED_RED();
+			delay(200);
+			LED_GREEN();
+			delay(200);
+			LED_PURPLE();
+			delay(200);
+			LED_ORANGE();
+			delay(200);
+			LED_WHITE();
+			delay(200);
+			LED_OFF();
 			break;
 		case 3333:
-			/* WHAT ABOOUTBLUE */
+			/* WHAT ABOUT BLUE */
 			for(int i=0;i<255;i++)
 			{
 				setLED(0,0,i);
@@ -975,7 +1051,7 @@ void handleCoolBadgeMode(char * entireMessage)
 			break;
 		
 		case 4444:
-			/* WHAT ABOOUTBLUE */
+			/* WHAT ABOUT RED */
 			for(int i=0;i<255;i++)
 			{
 				setLED(i,0,0);
@@ -988,7 +1064,7 @@ void handleCoolBadgeMode(char * entireMessage)
 			}
 			break;
 		case 5555:
-			/* WHAT ABOOUTBLUE */
+			/* WHAT ABOUT GREEN */
 			for(int i=0;i<255;i++)
 			{
 				setLED(0,i,0);
@@ -1001,6 +1077,9 @@ void handleCoolBadgeMode(char * entireMessage)
 			}
 			break;
 	}
+	}
+	LoadedScreen = 0;
+
 }
 
 void handleSendMode(char * entireMessage)
@@ -1150,7 +1229,7 @@ void parseCmds(uint8_t* buf,int buflen)
 {
   char* entireMessage = (char*)buf;
   char message_mode = entireMessage[0];
-  Serial.print("message:");Serial.println(entireMessage);
+  //Serial.print("message:");Serial.println(entireMessage); // Ross' App
   switch (message_mode)
   {
 	  case 'S':
@@ -1181,8 +1260,8 @@ void parseCmds(uint8_t* buf,int buflen)
 
 void showFreeMem()
 {
-    Serial.print("freeMemory()=");
-    Serial.println(freeMemory());
+    //Serial.print("freeMemory()=");
+    //Serial.println(freeMemory());
 }
 
 //new button reader, saves resistors and i have the pins anyway (yes i know resistors are nearly free anyway!)
@@ -1311,8 +1390,9 @@ void loop()
  
   if(currentMillis - previousMillis > randInterval) 
   {
+	//Serial.print("menu:");Serial.println(currentMode); // Ross' App
 	previousMillis = currentMillis;  
-    randInterval = random(1000,4000);
+    randInterval = random(minRand,maxRand);
     
     sprintf(currentRFStr,"S%i",BadgeNumber);
 	
