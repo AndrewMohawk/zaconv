@@ -653,20 +653,21 @@ void MenuScreen()
 			
 			if(BadgeNumber > 4000) // Attendees
 			{
-				x = 5;
+				x = 6;
 			}
-			if (BadgeNumber > 3000) // Speakers
+			if (BadgeNumber > 3000 && BadgeNumber < 4000) // Speakers
 			{
 				x = random(3,5);
 			}
-			if (BadgeNumber > 2000	) // BYOB's
+			if (BadgeNumber > 2000	 && BadgeNumber < 3000) // BYOB's
 			{
 				x= random(2,5);
 			}
-			if (BadgeNumber > 1000) // Ubers
+			 if (BadgeNumber > 1000 && BadgeNumber < 2000) // Ubers
 			{
 				x= random(1,5);
 			}
+
 			char cBadgeCode[6];
 			if(x == 1)
 			{
@@ -687,6 +688,10 @@ void MenuScreen()
 			if(x == 5)
 			{
 				sendCoolBadgeCode("C5555");
+			}
+			if(x ==6 )
+			{
+				//nothing for attendees :<
 			}
 			
 			//sendCoolBadgeCode(cBadgeCode);
