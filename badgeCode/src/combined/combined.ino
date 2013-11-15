@@ -12,8 +12,15 @@ Bounce b2 = Bounce(A3, 10);
 Bounce b3 = Bounce(A2, 10);
 Bounce b4 = Bounce(A1, 10);
 
+
+/*
+	Attendee = 4000+
+	Speaker = 3000+
+	BYOB = 2000+
+	Uber = 1000+
+*/
 //*THIS* badgenumber
-int BadgeNumber = 4337;
+int BadgeNumber = 1002;
 
 //Send Rand Interval things
 long previousMillis = 0;
@@ -275,7 +282,7 @@ void setup()
 	/*
 		LCD INIT
 	*/
-	myGLCD.InitLCD(60);
+	myGLCD.InitLCD(70);
 	myGLCD.setFont(SmallFont);
 	
 	//pinMode(A5, INPUT_PULLUP);	
